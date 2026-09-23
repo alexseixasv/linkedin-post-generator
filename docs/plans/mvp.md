@@ -1,5 +1,9 @@
 # MVP Plan
 
+## Status
+
+Shipped for local Docker Compose. All six slices below are implemented.
+
 ## Objective
 
 Ship the smallest complete LinkedIn Content Studio journey: profile → persona → relevant topic → angle → post → reviews → image, running locally with Docker Compose.
@@ -164,12 +168,12 @@ Tests: brief/prompt propagation, reference image passing, failure mapping, persi
 
 ## Implementation path
 
-1. Slice 1 foundation + profile
-2. Slice 2 AI text boundary
-3. Slice 3 news boundary
-4. Slice 4 relevance and opportunities
-5. Slice 5 writing pipeline
-6. Slice 6 image pipeline and final screen polish
+1. Slice 1 foundation + profile — done
+2. Slice 2 AI text boundary — done
+3. Slice 3 news boundary — done
+4. Slice 4 relevance and opportunities — done
+5. Slice 5 writing pipeline — done
+6. Slice 6 image pipeline and final screen polish — done
 
 Each slice updates docs/learnings when something non-obvious is discovered. Skills are updated when a procedure repeats or fails.
 

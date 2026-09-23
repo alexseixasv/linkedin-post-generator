@@ -6,7 +6,11 @@ This repository started with specialized agents under `.agents/` and no applicat
 
 ## Current status
 
-Discovery and planning are in `docs/`. Implementation follows vertical slices in `docs/plans/mvp.md`.
+The local MVP journey is complete:
+
+**Profile → Persona → Topics → Angles → Post → Image**
+
+Implementation notes live in `docs/plans/mvp.md`. Slice learnings are in `docs/learnings/`.
 
 ## Knowledge
 
@@ -22,22 +26,28 @@ Discovery and planning are in `docs/`. Implementation follows vertical slices in
 
 ```bash
 cp .env.example .env
+```
+
+Fill in:
+
+- `OPENAI_API_KEY` — persona, angles, post, and image ([OpenAI](https://platform.openai.com/api-keys))
+- `NEWS_API_KEY` — topic discovery ([NewsAPI.org](https://newsapi.org/register))
+
+Then:
+
+```bash
 docker compose up --build
 ```
 
-Then open `http://localhost:5173`.
+Open `http://localhost:5173`.
 
-Slice 1 is available: progressive professional profile, experiences, positioning, writing preferences, and up to three reference photos.
+After changing `.env`, recreate the API so the container rereads the keys:
 
-Slice 2 is available: generate a structured professional persona and authority map from the saved profile. Set `OPENAI_API_KEY` in `.env` before generating.
+```bash
+docker compose up -d api
+```
 
-Slice 3 is available: discover recent technology events from the persona. Set `NEWS_API_KEY` in `.env` before discovering.
-
-Slice 4 is available: generate up to three content opportunities with Why this post? and select an angle.
-
-Slice 5 is available: write a post from the selected angle, with story strategy, reviews, score, copy, and limited regeneration.
-
-Slice 6 is available: generate a supporting image from a creative brief and retry it without regenerating the post.
+`docker compose restart` is not enough for new environment variables.
 
 Without Docker:
 
@@ -48,3 +58,23 @@ npm run dev
 ```
 
 The API expects `DATABASE_URL` from `.env.example`.
+
+## Journey
+
+1. Record identity, experience, positioning, writing preferences, and up to three reference photos.
+2. Generate an evidence-based persona. Thin profiles are warned, not blocked.
+3. Discover recent technology events from that authority. Empty results stay empty.
+4. Compare up to three angles with Why this post? and select one.
+5. Write a post with story strategy, reviews, score, copy, and limited regeneration.
+6. Generate a supporting image from a creative brief. Retry the image without rewriting the post.
+
+The UI is English. Failures are retryable on the same step.
+
+## Checks
+
+```bash
+npm test
+npm run typecheck
+```
+
+Automated tests use fakes. They do not call OpenAI or NewsAPI.

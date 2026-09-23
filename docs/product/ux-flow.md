@@ -9,8 +9,8 @@ Leave with a post and image I would publish, after understanding why the system 
 1. **Welcome** — one screen: what the product does, what it will ask, what it will not do (no LinkedIn scraping, no fake experience).
 2. **Profile** — progressive sections: identity, experience, positioning, writing, photos. Save per section. Never one infinite HR form.
 3. **Persona** — explicit generating state, then a readable authority map. Warn if evidence is thin. Retry on failure.
-4. **Topics** — cards with source, date, and Why This Post. Empty state if nothing is credible. Do not fill the page with weak news.
-5. **Opportunities** — three angles compared. User selects one. No silent auto-pick.
+4. **Topics** — cards with source and date. Empty state if nothing is credible. Do not fill the page with weak news.
+5. **Opportunities** — up to three angles with Why This Post. User selects one. No silent auto-pick.
 6. **Post** — staged generating copy (strategy → draft → review). Result shows post, score, notes, source. Actions: copy, regenerate, alternative hook, tone, angle, rewrite section.
 7. **Image** — brief in human language, then generating state, then image. Retry image only. Optional: show that reference photos were used.
 
