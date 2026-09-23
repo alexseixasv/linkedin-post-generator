@@ -6,7 +6,7 @@ Leave with a post and image I would publish, after understanding why the system 
 
 ## Flow
 
-1. **Welcome** — one screen: what the product does, what it will ask, what it will not do (no LinkedIn scraping, no fake experience).
+1. **Welcome** — one screen: what the product does, the six-step journey, and what it will not do (no LinkedIn scraping, no fake experience). Language can be switched in the top bar (English, Portuguese, Spanish).
 2. **Profile** — progressive sections: identity, experience, positioning, writing, photos. Save per section. Never one infinite HR form.
 3. **Persona** — explicit generating state, then a readable authority map. Warn if evidence is thin. Retry on failure.
 4. **Topics** — cards with source and date. Empty state if nothing is credible. Do not fill the page with weak news.

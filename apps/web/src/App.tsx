@@ -7,10 +7,13 @@ import {
   type ProfilePublic,
 } from "@studio/shared";
 import { ImageView } from "./ImageView";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { OpportunitiesView } from "./OpportunitiesView";
 import { PersonaView } from "./PersonaView";
 import { PostView } from "./PostView";
 import { TopicsView } from "./TopicsView";
+import { WelcomeView } from "./WelcomeView";
+import { useI18n, type Messages } from "./i18n";
 import {
   deletePhoto,
   emptyProfile,
@@ -21,22 +24,23 @@ import {
 } from "./api";
 
 const STEPS = [
-  { id: "welcome", label: "Welcome" },
-  { id: "identity", label: "Identity" },
-  { id: "experience", label: "Experience" },
-  { id: "positioning", label: "Positioning" },
-  { id: "writing", label: "Writing" },
-  { id: "photos", label: "Photos" },
-  { id: "persona", label: "Persona" },
-  { id: "topics", label: "Topics" },
-  { id: "opportunities", label: "Angles" },
-  { id: "post", label: "Post" },
-  { id: "image", label: "Image" },
+  { id: "welcome" },
+  { id: "identity" },
+  { id: "experience" },
+  { id: "positioning" },
+  { id: "writing" },
+  { id: "photos" },
+  { id: "persona" },
+  { id: "topics" },
+  { id: "opportunities" },
+  { id: "post" },
+  { id: "image" },
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];
 
 export function App() {
+  const { m } = useI18n();
   const [step, setStep] = useState<StepId>("welcome");
   const [profile, setProfile] = useState<ProfileInput>(emptyProfile);
   const [saved, setSaved] = useState<ProfilePublic | null>(null);
@@ -65,6 +69,7 @@ export function App() {
   }, []);
 
   const stepIndex = STEPS.findIndex((item) => item.id === step);
+  const panel = panelCopy(step, m);
 
   async function persist(nextStep?: StepId) {
     setError(null);
@@ -110,43 +115,22 @@ export function App() {
   return (
     <div className="shell">
       <header className="topbar">
-        <div className="brand">
-          Content <span>Studio</span>
+        <button className="brand" type="button" onClick={() => setStep("welcome")}>
+          {m.common.brandLead} <span>{m.common.brandAccent}</span>
+        </button>
+        <div className="topbar-end">
+          <p className="eyebrow">{m.common.tagline}</p>
+          <LanguageSwitcher />
         </div>
-        <div className="eyebrow">LinkedIn for technology professionals</div>
       </header>
 
       {step === "welcome" ? (
-        <Welcome onStart={() => setStep("identity")} />
+        <WelcomeView onStart={() => setStep("identity")} />
       ) : (
         <section className="panel">
-          <p className="eyebrow">
-            {step === "persona"
-              ? "Content authority"
-              : step === "topics"
-                ? "Current events"
-                : step === "opportunities"
-                  ? "Why this post"
-                  : step === "post"
-                    ? "Publishable draft"
-                    : step === "image"
-                      ? "Supporting image"
-                      : "Professional profile"}
-          </p>
-          <h2>
-            {step === "persona"
-              ? "How the system reads your profile"
-              : step === "topics"
-                ? "What you have a reason to discuss"
-                : step === "opportunities"
-                  ? "Pick a credible angle"
-                  : step === "post"
-                    ? "Write from the selected angle"
-                    : step === "image"
-                      ? "Art-direct the visual"
-                      : "Tell the system who you actually are"}
-          </h2>
-          <nav className="steps" aria-label="Profile sections">
+          <p className="eyebrow">{panel.eyebrow}</p>
+          <h2>{panel.title}</h2>
+          <nav className="steps" aria-label={m.steps.nav}>
             {STEPS.filter((item) => item.id !== "welcome").map((item) => (
               <button
                 key={item.id}
@@ -154,7 +138,7 @@ export function App() {
                 onClick={() => setStep(item.id)}
                 type="button"
               >
-                {item.label}
+                {m.steps[item.id]}
               </button>
             ))}
           </nav>
@@ -202,40 +186,40 @@ export function App() {
           step !== "opportunities" &&
           step !== "post" &&
           step !== "image" ? (
-          <div className="actions">
-            <button
-              className="btn ghost"
-              type="button"
-              onClick={() => setStep(STEPS[Math.max(1, stepIndex - 1)]?.id ?? "identity")}
-            >
-              Back
-            </button>
-            <div>
-              <p className="status">
-                {status === "saving"
-                  ? "Saving…"
-                  : status === "loading"
-                    ? "Loading profile…"
-                    : saved
-                      ? "Saved locally in this workspace"
-                      : "Not saved yet"}
-              </p>
-            </div>
-            {step === "photos" ? (
-              <button className="btn primary" type="button" onClick={() => persist("persona")}>
-                Save and continue
-              </button>
-            ) : (
+            <div className="actions">
               <button
-                className="btn primary"
+                className="btn ghost"
                 type="button"
-                disabled={status === "saving"}
-                onClick={() => persist(STEPS[stepIndex + 1]?.id)}
+                onClick={() => setStep(STEPS[Math.max(0, stepIndex - 1)]?.id ?? "welcome")}
               >
-                Save and continue
+                {m.common.back}
               </button>
-            )}
-          </div>
+              <div>
+                <p className="status">
+                  {status === "saving"
+                    ? m.status.saving
+                    : status === "loading"
+                      ? m.status.loadingProfile
+                      : saved
+                        ? m.status.saved
+                        : m.status.notSaved}
+                </p>
+              </div>
+              {step === "photos" ? (
+                <button className="btn primary" type="button" onClick={() => persist("persona")}>
+                  {m.common.saveContinue}
+                </button>
+              ) : (
+                <button
+                  className="btn primary"
+                  type="button"
+                  disabled={status === "saving"}
+                  onClick={() => persist(STEPS[stepIndex + 1]?.id)}
+                >
+                  {m.common.saveContinue}
+                </button>
+              )}
+            </div>
           ) : (
             <div className="actions">
               <button
@@ -247,19 +231,19 @@ export function App() {
                       ? "post"
                       : step === "post"
                         ? "opportunities"
-                      : step === "opportunities"
-                        ? "topics"
-                        : step === "topics"
-                          ? "persona"
-                          : "photos",
+                        : step === "opportunities"
+                          ? "topics"
+                          : step === "topics"
+                            ? "persona"
+                            : "photos",
                   )
                 }
               >
-                Back
+                {m.common.back}
               </button>
               {step === "persona" ? (
                 <button className="btn primary" type="button" onClick={() => setStep("topics")}>
-                  Continue to topics
+                  {m.nav.continueTopics}
                 </button>
               ) : null}
               {step === "topics" ? (
@@ -268,12 +252,12 @@ export function App() {
                   type="button"
                   onClick={() => setStep("opportunities")}
                 >
-                  Continue to angles
+                  {m.nav.continueAngles}
                 </button>
               ) : null}
               {step === "post" ? (
                 <button className="btn primary" type="button" onClick={() => setStep("image")}>
-                  Continue to image
+                  {m.nav.continueImage}
                 </button>
               ) : null}
             </div>
@@ -284,41 +268,6 @@ export function App() {
   );
 }
 
-function Welcome({ onStart }: { onStart: () => void }) {
-  return (
-    <section className="hero">
-      <div className="hero-copy">
-        <p className="eyebrow">Not a generic post generator</p>
-        <h1>Write from authority you actually have.</h1>
-        <p className="lede">
-          LinkedIn Content Studio starts with your real background, then looks for current
-          technology events you have a credible reason to discuss. It will not invent your
-          experience, scrape LinkedIn, or chase empty engagement.
-        </p>
-        <div className="actions" style={{ justifyContent: "flex-start", marginTop: 24 }}>
-          <button className="btn primary" type="button" onClick={onStart}>
-            Build your professional profile
-          </button>
-        </div>
-      </div>
-      <aside className="panel">
-        <p className="eyebrow">The journey</p>
-        <h3>Profile first. Content later.</h3>
-        <ul className="promise-list">
-          <li>Capture identity, proof, positioning, and writing style.</li>
-          <li>Upload up to three reference photos for later image generation.</li>
-          <li>Incomplete fields are allowed. Thin evidence will be called out.</li>
-          <li>Generate a persona that maps what you can credibly talk about.</li>
-          <li>Discover current events matched to that authority, not to whatever is trending.</li>
-          <li>Compare a few angles and choose one the profile can actually support.</li>
-          <li>Write a post from that angle, then review claims before you copy it.</li>
-          <li>Generate a supporting image from a brief, then retry the image without losing the post.</li>
-        </ul>
-      </aside>
-    </section>
-  );
-}
-
 function IdentityForm({
   profile,
   onChange,
@@ -326,33 +275,34 @@ function IdentityForm({
   profile: ProfileInput;
   onChange: (profile: ProfileInput) => void;
 }) {
+  const { m } = useI18n();
   return (
     <div className="grid-2">
-      <Field label="Full name">
+      <Field label={m.identity.fullName}>
         <input
           value={profile.fullName}
           onChange={(event) => onChange({ ...profile, fullName: event.target.value })}
         />
       </Field>
-      <Field label="Headline">
+      <Field label={m.identity.headline}>
         <input
           value={profile.headline}
           onChange={(event) => onChange({ ...profile, headline: event.target.value })}
         />
       </Field>
-      <Field label="Current title">
+      <Field label={m.identity.currentTitle}>
         <input
           value={profile.currentJobTitle}
           onChange={(event) => onChange({ ...profile, currentJobTitle: event.target.value })}
         />
       </Field>
-      <Field label="Current company">
+      <Field label={m.identity.currentCompany}>
         <input
           value={profile.currentCompany}
           onChange={(event) => onChange({ ...profile, currentCompany: event.target.value })}
         />
       </Field>
-      <Field label="Years of experience">
+      <Field label={m.identity.years}>
         <input
           type="number"
           min={0}
@@ -366,31 +316,31 @@ function IdentityForm({
           }
         />
       </Field>
-      <Field label="Preferred language">
+      <Field label={m.identity.preferredLanguage}>
         <input
           value={profile.preferredLanguage}
           onChange={(event) => onChange({ ...profile, preferredLanguage: event.target.value })}
         />
       </Field>
-      <Field className="full" label="About">
+      <Field className="full" label={m.identity.about}>
         <textarea
           value={profile.about}
           onChange={(event) => onChange({ ...profile, about: event.target.value })}
         />
       </Field>
-      <Field className="full" label="Top skills">
+      <Field className="full" label={m.identity.topSkills}>
         <TagInput
           values={profile.topSkills}
           onChange={(topSkills) => onChange({ ...profile, topSkills })}
         />
       </Field>
-      <Field className="full" label="Technologies">
+      <Field className="full" label={m.identity.technologies}>
         <TagInput
           values={profile.technologies}
           onChange={(technologies) => onChange({ ...profile, technologies })}
         />
       </Field>
-      <Field className="full" label="Industries">
+      <Field className="full" label={m.identity.industries}>
         <TagInput
           values={profile.industries}
           onChange={(industries) => onChange({ ...profile, industries })}
@@ -407,15 +357,14 @@ function ExperienceForm({
   profile: ProfileInput;
   onChange: (profile: ProfileInput) => void;
 }) {
+  const { m } = useI18n();
   return (
     <div>
-      {profile.experiences.length === 0 ? (
-        <p className="empty">Add roles that can later justify a professional point of view.</p>
-      ) : null}
+      {profile.experiences.length === 0 ? <p className="empty">{m.experience.empty}</p> : null}
       {profile.experiences.map((experience, index) => (
         <article className="experience-card" key={experience.id ?? index}>
           <div className="grid-2">
-            <Field label="Role">
+            <Field label={m.experience.role}>
               <input
                 value={experience.role}
                 onChange={(event) =>
@@ -423,7 +372,7 @@ function ExperienceForm({
                 }
               />
             </Field>
-            <Field label="Company">
+            <Field label={m.experience.company}>
               <input
                 value={experience.company}
                 onChange={(event) =>
@@ -431,7 +380,7 @@ function ExperienceForm({
                 }
               />
             </Field>
-            <Field label="Start">
+            <Field label={m.experience.start}>
               <input
                 value={experience.startPeriod}
                 onChange={(event) =>
@@ -439,7 +388,7 @@ function ExperienceForm({
                 }
               />
             </Field>
-            <Field label="End">
+            <Field label={m.experience.end}>
               <input
                 value={experience.endPeriod}
                 onChange={(event) =>
@@ -447,7 +396,7 @@ function ExperienceForm({
                 }
               />
             </Field>
-            <Field className="full" label="What you did">
+            <Field className="full" label={m.experience.whatYouDid}>
               <textarea
                 value={experience.description}
                 onChange={(event) =>
@@ -455,7 +404,7 @@ function ExperienceForm({
                 }
               />
             </Field>
-            <Field className="full" label="Achievements">
+            <Field className="full" label={m.experience.achievements}>
               <textarea
                 value={experience.achievements}
                 onChange={(event) =>
@@ -463,7 +412,7 @@ function ExperienceForm({
                 }
               />
             </Field>
-            <Field className="full" label="Technologies in this role">
+            <Field className="full" label={m.experience.roleTech}>
               <TagInput
                 values={experience.technologies}
                 onChange={(technologies) =>
@@ -482,23 +431,23 @@ function ExperienceForm({
               })
             }
           >
-            Remove role
+            {m.experience.removeRole}
           </button>
         </article>
       ))}
-      <Field label="Architecture experience">
+      <Field label={m.experience.architecture}>
         <textarea
           value={profile.architectureExperience}
           onChange={(event) => onChange({ ...profile, architectureExperience: event.target.value })}
         />
       </Field>
-      <Field label="Leadership experience">
+      <Field label={m.experience.leadership}>
         <textarea
           value={profile.leadershipExperience}
           onChange={(event) => onChange({ ...profile, leadershipExperience: event.target.value })}
         />
       </Field>
-      <Field label="Business impact">
+      <Field label={m.experience.businessImpact}>
         <textarea
           value={profile.businessImpact}
           onChange={(event) => onChange({ ...profile, businessImpact: event.target.value })}
@@ -527,7 +476,7 @@ function ExperienceForm({
           })
         }
       >
-        Add experience
+        {m.experience.add}
       </button>
     </div>
   );
@@ -540,15 +489,16 @@ function PositioningForm({
   profile: ProfileInput;
   onChange: (profile: ProfileInput) => void;
 }) {
+  const { m } = useI18n();
   return (
     <div>
-      <Field label="How should people describe you after reading your posts?">
+      <Field label={m.positioning.perception}>
         <textarea
           value={profile.desiredPerception}
           onChange={(event) => onChange({ ...profile, desiredPerception: event.target.value })}
         />
       </Field>
-      <Field label="Positioning">
+      <Field label={m.positioning.positioning}>
         <div className="pills">
           {POSITIONING_OPTIONS.map((option) => {
             const selected = profile.positioning.includes(option);
@@ -566,25 +516,25 @@ function PositioningForm({
                   })
                 }
               >
-                {option}
+                {m.positioning.options[option]}
               </button>
             );
           })}
         </div>
       </Field>
-      <Field label="Target audience">
+      <Field label={m.positioning.audience}>
         <textarea
           value={profile.targetAudience}
           onChange={(event) => onChange({ ...profile, targetAudience: event.target.value })}
         />
       </Field>
-      <Field label="Subjects of interest">
+      <Field label={m.positioning.interest}>
         <TagInput
           values={profile.subjectsOfInterest}
           onChange={(subjectsOfInterest) => onChange({ ...profile, subjectsOfInterest })}
         />
       </Field>
-      <Field label="Subjects to avoid">
+      <Field label={m.positioning.avoid}>
         <TagInput
           values={profile.subjectsToAvoid}
           onChange={(subjectsToAvoid) => onChange({ ...profile, subjectsToAvoid })}
@@ -601,9 +551,10 @@ function WritingForm({
   profile: ProfileInput;
   onChange: (profile: ProfileInput) => void;
 }) {
+  const { m } = useI18n();
   return (
     <div>
-      <Field label="Tone">
+      <Field label={m.writing.tone}>
         <div className="pills">
           {WRITING_TONES.map((tone) => {
             const selected = profile.writingTones.includes(tone);
@@ -621,13 +572,13 @@ function WritingForm({
                   })
                 }
               >
-                {tone}
+                {m.writing.tones[tone]}
               </button>
             );
           })}
         </div>
       </Field>
-      <Field label="Preferred post length">
+      <Field label={m.writing.length}>
         <div className="pills">
           {POST_LENGTHS.map((length) => (
             <button
@@ -636,12 +587,12 @@ function WritingForm({
               className={profile.postLength === length ? "pill selected" : "pill"}
               onClick={() => onChange({ ...profile, postLength: length })}
             >
-              {length}
+              {m.writing.lengths[length]}
             </button>
           ))}
         </div>
       </Field>
-      <Field label="Optional writing sample">
+      <Field label={m.writing.sample}>
         <textarea
           value={profile.writingSamples[0]?.body ?? ""}
           onChange={(event) =>
@@ -667,24 +618,22 @@ function PhotoForm({
   onRemove: (id: string) => Promise<void>;
   uploading: boolean;
 }) {
+  const { m } = useI18n();
   return (
     <div>
-      <p className="lede">
-        Up to three professional photos. They are identity references for later image generation,
-        not a gallery.
-      </p>
+      <p className="lede">{m.photos.lede}</p>
       <div className="photos">
         {photos.map((photo) => (
           <div className="photo-card" key={photo.id}>
-            <img src={photo.url} alt="Reference" />
+            <img src={photo.url} alt={m.photos.alt} />
             <button className="btn ghost" type="button" onClick={() => onRemove(photo.id)}>
-              Remove
+              {m.photos.remove}
             </button>
           </div>
         ))}
         {photos.length < 3 ? (
-          <label className="photo-card" style={{ display: "grid", placeItems: "center" }}>
-            {uploading ? "Uploading…" : "Add photo"}
+          <label className="photo-card photo-add">
+            {uploading ? m.photos.uploading : m.photos.add}
             <input
               type="file"
               accept="image/png,image/jpeg,image/webp"
@@ -726,6 +675,7 @@ function TagInput({
   values: string[];
   onChange: (values: string[]) => void;
 }) {
+  const { m } = useI18n();
   const [draft, setDraft] = useState("");
   const unique = values;
 
@@ -751,10 +701,10 @@ function TagInput({
               add();
             }
           }}
-          placeholder="Type and press Enter"
+          placeholder={m.identity.tagPlaceholder}
         />
         <button className="btn ghost" type="button" onClick={add}>
-          Add
+          {m.common.add}
         </button>
       </div>
       <div className="tags">
@@ -769,6 +719,23 @@ function TagInput({
       </div>
     </div>
   );
+}
+
+function panelCopy(step: StepId, messages: Messages) {
+  switch (step) {
+    case "persona":
+      return messages.panel.persona;
+    case "topics":
+      return messages.panel.topics;
+    case "opportunities":
+      return messages.panel.opportunities;
+    case "post":
+      return messages.panel.post;
+    case "image":
+      return messages.panel.image;
+    default:
+      return messages.panel.profile;
+  }
 }
 
 function updateExperience(

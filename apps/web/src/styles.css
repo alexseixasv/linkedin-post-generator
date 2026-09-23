@@ -43,7 +43,7 @@ h2,
 h3 {
   font-family: Fraunces, Georgia, serif;
   font-weight: 650;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   margin: 0;
 }
 
@@ -56,18 +56,58 @@ h3 {
 .topbar {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 16px;
-  margin-bottom: 28px;
+  margin-bottom: 36px;
+}
+
+.topbar-end {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .brand {
   font-family: Fraunces, serif;
   font-size: 1.35rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
 }
 
 .brand span {
   color: var(--copper);
+}
+
+.lang-switch {
+  display: flex;
+  gap: 6px;
+}
+
+.lang-btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.lang-btn svg {
+  display: block;
+  width: 22px;
+  height: 15px;
+  border-radius: 2px;
+}
+
+.lang-btn.active {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px rgba(28, 25, 21, 0.18);
 }
 
 .eyebrow {
@@ -77,18 +117,95 @@ h3 {
   text-transform: uppercase;
 }
 
-.hero {
+.welcome {
   display: grid;
-  grid-template-columns: 1.3fr 0.9fr;
-  gap: 28px;
-  margin-bottom: 28px;
+  gap: 48px;
+}
+
+.hero-copy {
+  max-width: 40rem;
 }
 
 .hero-copy h1 {
-  font-size: clamp(2.4rem, 5vw, 4.4rem);
-  line-height: 0.95;
-  max-width: 12ch;
-  margin: 10px 0 16px;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  margin: 12px 0 18px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.welcome-block h2 {
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  margin: 8px 0 20px;
+}
+
+.journey-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.journey-card {
+  background: var(--paper-strong);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 18px 18px 20px;
+  min-height: 100%;
+}
+
+.journey-num {
+  display: block;
+  font-family: Fraunces, Georgia, serif;
+  color: var(--copper);
+  font-size: 1.15rem;
+  margin-bottom: 10px;
+}
+
+.journey-card h3 {
+  font-size: 1.15rem;
+  margin-bottom: 8px;
+}
+
+.journey-card p,
+.promise-card p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.promise-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.promise-card {
+  background: var(--paper-strong);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 20px;
+}
+
+.promise-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.photo-add {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
 }
 
 .lede {
@@ -447,11 +564,32 @@ textarea {
   .hero,
   .grid-2,
   .photos,
-  .bands {
+  .bands,
+  .journey-grid,
+  .promise-grid {
     grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .topbar-end {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .topbar-end .eyebrow {
+    display: none;
   }
 
   .actions {
     flex-direction: column;
+  }
+}
+
+@media (min-width: 841px) and (max-width: 1100px) {
+  .journey-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

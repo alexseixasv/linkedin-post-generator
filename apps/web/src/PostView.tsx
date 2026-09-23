@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  ANGLE_LABELS,
   ANGLE_TYPES,
   WRITING_TONES,
   type AngleType,
@@ -16,14 +15,10 @@ import {
   rewritePostSection,
   type ApiError,
 } from "./api";
-
-const GENERATING_COPY = [
-  "Choosing a story strategy…",
-  "Drafting from evidence, not from hype…",
-  "Reviewing claims, language, and score…",
-];
+import { useI18n } from "./i18n";
 
 export function PostView() {
+  const { m, t } = useI18n();
   const [post, setPost] = useState<PostPublic | null>(null);
   const [status, setStatus] = useState<"loading" | "idle" | "generating">("loading");
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +26,7 @@ export function PostView() {
   const [tone, setTone] = useState<WritingTone>(WRITING_TONES[0]);
   const [angle, setAngle] = useState<AngleType>(ANGLE_TYPES[0]);
   const [section, setSection] = useState("");
-  const [stage, setStage] = useState(GENERATING_COPY[0]);
+  const [stage, setStage] = useState(m.post.stages[0]);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,18 +57,19 @@ export function PostView() {
       return;
     }
     let index = 0;
+    setStage(m.post.stages[0]);
     const timer = window.setInterval(() => {
-      index = (index + 1) % GENERATING_COPY.length;
-      setStage(GENERATING_COPY[index] ?? GENERATING_COPY[0]);
+      index = (index + 1) % m.post.stages.length;
+      setStage(m.post.stages[index] ?? m.post.stages[0]);
     }, 2400);
     return () => window.clearInterval(timer);
-  }, [status]);
+  }, [status, m.post.stages]);
 
   async function run(action: () => Promise<PostPublic>) {
     setError(null);
     setCopied(false);
     setStatus("generating");
-    setStage(GENERATING_COPY[0]);
+    setStage(m.post.stages[0]);
     try {
       const next = await action();
       setPost(next);
@@ -95,15 +91,12 @@ export function PostView() {
   }
 
   if (status === "loading") {
-    return <p className="empty">Loading post…</p>;
+    return <p className="empty">{m.post.loading}</p>;
   }
 
   return (
     <div>
-      <p className="lede">
-        The post is written from the selected angle and the saved profile. Reviews can cut claims.
-        They cannot invent a more impressive career.
-      </p>
+      <p className="lede">{m.post.lede}</p>
       {error ? <div className="error">{error}</div> : null}
 
       {status === "generating" ? <p className="empty">{stage}</p> : null}
@@ -111,11 +104,12 @@ export function PostView() {
       {post && status !== "generating" ? (
         <div className="post-result">
           <p className="eyebrow">
-            {ANGLE_LABELS[post.angle]} · {post.tone} · score {post.quality.score}
+            {m.opportunities.angles[post.angle]} · {m.writing.tones[post.tone]} ·{" "}
+            {t("post.score", { score: post.quality.score })}
           </p>
           <p className="post-body">{post.body}</p>
           <p>
-            Source:{" "}
+            {m.post.source}{" "}
             <a href={post.sourceUrl} target="_blank" rel="noreferrer">
               {post.sourceTitle}
             </a>
@@ -123,41 +117,39 @@ export function PostView() {
 
           <div className="bands">
             <div className="band strong">
-              <p className="eyebrow">Story</p>
+              <p className="eyebrow">{m.post.story}</p>
               <p>{post.storyStrategy.structure}</p>
               <p>{post.storyStrategy.takeaway}</p>
             </div>
             <div className="band">
-              <p className="eyebrow">Quality</p>
+              <p className="eyebrow">{m.post.quality}</p>
               <p className="score">{post.quality.score}</p>
               <p>{post.quality.explanation}</p>
             </div>
           </div>
 
           <div className="band">
-            <p className="eyebrow">Writing review</p>
+            <p className="eyebrow">{m.post.writingReview}</p>
             <p>{post.writingReview.summary}</p>
           </div>
           <div className="band">
-            <p className="eyebrow">Fact review</p>
+            <p className="eyebrow">{m.post.factReview}</p>
             <p>{post.factReview.summary}</p>
             {post.factReview.unsupportedClaims.length > 0 ? (
               <p>
-                <strong>Held back.</strong> {post.factReview.unsupportedClaims.join(" · ")}
+                <strong>{m.post.heldBack}</strong> {post.factReview.unsupportedClaims.join(" · ")}
               </p>
             ) : null}
           </div>
           <div className="band">
-            <p className="eyebrow">SEO</p>
+            <p className="eyebrow">{m.post.seo}</p>
             <p>{post.seoReview.summary}</p>
             <p>{post.seoReview.stuffingRisk}</p>
           </div>
         </div>
       ) : null}
 
-      {status === "idle" && !post ? (
-        <p className="empty">No post yet. Write one from the selected angle.</p>
-      ) : null}
+      {status === "idle" && !post ? <p className="empty">{m.post.empty}</p> : null}
 
       <div className="actions">
         <button
@@ -166,11 +158,11 @@ export function PostView() {
           disabled={status === "generating"}
           onClick={() => void run(generatePost)}
         >
-          {post ? "Regenerate post" : "Write post"}
+          {post ? m.post.regenerate : m.post.write}
         </button>
         {post ? (
           <button className="btn ghost" type="button" onClick={() => void copy()}>
-            {copied ? "Copied" : "Copy post"}
+            {copied ? m.post.copied : m.post.copy}
           </button>
         ) : null}
       </div>
@@ -183,26 +175,26 @@ export function PostView() {
               type="button"
               onClick={() => void run(generateAlternativeHook)}
             >
-              Alternative hook
+              {m.post.altHook}
             </button>
           </div>
           <div className="grid-2">
             <label className="field">
-              Tone
+              {m.post.tone}
               <select value={tone} onChange={(event) => setTone(event.target.value as WritingTone)}>
                 {WRITING_TONES.map((item) => (
                   <option key={item} value={item}>
-                    {item}
+                    {m.writing.tones[item]}
                   </option>
                 ))}
               </select>
             </label>
             <label className="field">
-              Angle
+              {m.post.angle}
               <select value={angle} onChange={(event) => setAngle(event.target.value as AngleType)}>
                 {ANGLE_TYPES.map((item) => (
                   <option key={item} value={item}>
-                    {ANGLE_LABELS[item]}
+                    {m.opportunities.angles[item]}
                   </option>
                 ))}
               </select>
@@ -214,18 +206,18 @@ export function PostView() {
               type="button"
               onClick={() => void run(() => changePostTone(tone))}
             >
-              Apply tone
+              {m.post.applyTone}
             </button>
             <button
               className="btn ghost"
               type="button"
               onClick={() => void run(() => changePostAngle(angle))}
             >
-              Apply angle
+              {m.post.applyAngle}
             </button>
           </div>
           <label className="field full">
-            Rewrite this section
+            {m.post.rewriteLabel}
             <textarea value={section} onChange={(event) => setSection(event.target.value)} />
           </label>
           <button
@@ -234,7 +226,7 @@ export function PostView() {
             disabled={!section.trim()}
             onClick={() => void run(() => rewritePostSection(section))}
           >
-            Rewrite section
+            {m.post.rewrite}
           </button>
         </div>
       ) : null}

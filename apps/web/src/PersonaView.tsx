@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import type { PersonaPublic } from "@studio/shared";
 import { fetchPersona, generatePersona, type ApiError } from "./api";
+import { useI18n } from "./i18n";
 
 export function PersonaView() {
+  const { m } = useI18n();
   const [persona, setPersona] = useState<PersonaPublic | null>(null);
   const [status, setStatus] = useState<"loading" | "idle" | "generating">("loading");
   const [error, setError] = useState<string | null>(null);
@@ -40,33 +42,21 @@ export function PersonaView() {
   }
 
   if (status === "loading") {
-    return <p className="empty">Loading persona…</p>;
+    return <p className="empty">{m.persona.loading}</p>;
   }
 
   return (
     <div>
-      <p className="lede">
-        This is an evidence-based reading of the saved profile, not a more impressive version of
-        you. Strong topics require repeated proof. Desired positioning cannot fill gaps.
-      </p>
+      <p className="lede">{m.persona.lede}</p>
       {error ? <div className="error">{error}</div> : null}
       {persona?.evidenceWarning ? <div className="notice">{persona.evidenceWarning}</div> : null}
-      {persona?.stale ? (
-        <div className="notice">
-          The profile changed after this persona was generated. Refresh it before trusting the
-          authority map.
-        </div>
-      ) : null}
+      {persona?.stale ? <div className="notice">{m.persona.stale}</div> : null}
 
-      {status === "generating" ? (
-        <p className="empty">Reading your evidence and mapping authority…</p>
-      ) : null}
+      {status === "generating" ? <p className="empty">{m.persona.generating}</p> : null}
 
       {persona && status !== "generating" ? <PersonaResult persona={persona} /> : null}
 
-      {!persona && status === "idle" ? (
-        <p className="empty">No persona yet. Generate one from the saved profile.</p>
-      ) : null}
+      {!persona && status === "idle" ? <p className="empty">{m.persona.empty}</p> : null}
 
       <div className="actions">
         <button
@@ -75,7 +65,7 @@ export function PersonaView() {
           disabled={status === "generating"}
           onClick={() => void generate()}
         >
-          {persona ? "Regenerate persona" : "Generate persona"}
+          {persona ? m.persona.regenerate : m.persona.generate}
         </button>
       </div>
     </div>
@@ -83,6 +73,7 @@ export function PersonaView() {
 }
 
 function PersonaResult({ persona }: { persona: PersonaPublic }) {
+  const { m } = useI18n();
   const body = persona.persona;
   return (
     <div className="persona-result">
@@ -93,28 +84,28 @@ function PersonaResult({ persona }: { persona: PersonaPublic }) {
       </p>
 
       <div className="grid-2">
-        <Fact label="Core expertise" values={body.coreExpertise} />
-        <Fact label="Supporting expertise" values={body.supportingExpertise} />
-        <Fact label="Content pillars" values={body.contentPillars} />
-        <Fact label="Differentiators" values={body.differentiators} />
+        <Fact label={m.persona.coreExpertise} values={body.coreExpertise} />
+        <Fact label={m.persona.supportingExpertise} values={body.supportingExpertise} />
+        <Fact label={m.persona.contentPillars} values={body.contentPillars} />
+        <Fact label={m.persona.differentiators} values={body.differentiators} />
       </div>
 
       <p>
-        <strong>Technical depth.</strong> {body.technicalDepth}
+        <strong>{m.persona.technicalDepth}.</strong> {body.technicalDepth}
       </p>
       <p>
-        <strong>Leadership.</strong> {body.leadershipExposure}
+        <strong>{m.persona.leadership}.</strong> {body.leadershipExposure}
       </p>
       <p>
-        <strong>Audience.</strong> {body.targetAudience}
+        <strong>{m.persona.audience}.</strong> {body.targetAudience}
       </p>
       <p>
-        <strong>Desired perception.</strong> {body.desiredPerception}
+        <strong>{m.persona.perception}.</strong> {body.desiredPerception}
       </p>
 
       {body.proofPoints.length > 0 ? (
         <div>
-          <h3>Proof points</h3>
+          <h3>{m.persona.proofPoints}</h3>
           <ul className="promise-list">
             {body.proofPoints.map((point) => (
               <li key={point.claim}>
@@ -126,21 +117,22 @@ function PersonaResult({ persona }: { persona: PersonaPublic }) {
       ) : null}
 
       <div className="bands">
-        <Band title="Strong authority" tone="strong" items={body.strongAuthorityTopics} />
-        <Band title="Credible" tone="credible" items={body.credibleTopics} />
-        <Band title="Adjacent" tone="adjacent" items={body.adjacentTopics} />
-        <Band title="Risky" tone="risky" items={body.riskyTopics} />
+        <Band title={m.persona.strong} tone="strong" items={body.strongAuthorityTopics} />
+        <Band title={m.persona.credible} tone="credible" items={body.credibleTopics} />
+        <Band title={m.persona.adjacent} tone="adjacent" items={body.adjacentTopics} />
+        <Band title={m.persona.risky} tone="risky" items={body.riskyTopics} />
       </div>
     </div>
   );
 }
 
 function Fact({ label, values }: { label: string; values: string[] }) {
+  const { m } = useI18n();
   return (
     <div className="field">
       <strong>{label}</strong>
       <div className="tags">
-        {values.length === 0 ? <span className="empty">None from current evidence</span> : null}
+        {values.length === 0 ? <span className="empty">{m.persona.noneEvidence}</span> : null}
         {values.map((value) => (
           <span className="tag" key={value}>
             {value}
@@ -160,10 +152,11 @@ function Band({
   tone: "strong" | "credible" | "adjacent" | "risky";
   items: Array<{ topic: string; evidence: string }>;
 }) {
+  const { m } = useI18n();
   return (
     <section className={`band ${tone}`}>
       <strong>{title}</strong>
-      {items.length === 0 ? <p className="empty">None</p> : null}
+      {items.length === 0 ? <p className="empty">{m.common.none}</p> : null}
       {items.map((item) => (
         <p key={item.topic}>
           {item.topic}

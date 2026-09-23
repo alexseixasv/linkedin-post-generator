@@ -1,18 +1,14 @@
 import { useEffect, useState } from "react";
 import type { GeneratedImagePublic } from "@studio/shared";
 import { fetchImage, generateImage, type ApiError } from "./api";
-
-const GENERATING_COPY = [
-  "Art-directing a supporting image…",
-  "Turning the brief into a generation prompt…",
-  "Rendering the image…",
-];
+import { useI18n } from "./i18n";
 
 export function ImageView() {
+  const { m } = useI18n();
   const [image, setImage] = useState<GeneratedImagePublic | null>(null);
   const [status, setStatus] = useState<"loading" | "idle" | "generating">("loading");
   const [error, setError] = useState<string | null>(null);
-  const [stage, setStage] = useState(GENERATING_COPY[0]);
+  const [stage, setStage] = useState(m.image.stages[0]);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,17 +35,18 @@ export function ImageView() {
       return;
     }
     let index = 0;
+    setStage(m.image.stages[0]);
     const timer = window.setInterval(() => {
-      index = (index + 1) % GENERATING_COPY.length;
-      setStage(GENERATING_COPY[index] ?? GENERATING_COPY[0]);
+      index = (index + 1) % m.image.stages.length;
+      setStage(m.image.stages[index] ?? m.image.stages[0]);
     }, 2400);
     return () => window.clearInterval(timer);
-  }, [status]);
+  }, [status, m.image.stages]);
 
   async function generate() {
     setError(null);
     setStatus("generating");
-    setStage(GENERATING_COPY[0]);
+    setStage(m.image.stages[0]);
     try {
       setImage(await generateImage());
     } catch (err) {
@@ -60,15 +57,12 @@ export function ImageView() {
   }
 
   if (status === "loading") {
-    return <p className="empty">Loading image…</p>;
+    return <p className="empty">{m.image.loading}</p>;
   }
 
   return (
     <div>
-      <p className="lede">
-        The image is art-directed from a brief, not pasted from the post. Retrying it will not
-        rewrite the copy.
-      </p>
+      <p className="lede">{m.image.lede}</p>
       {error ? <div className="error">{error}</div> : null}
       {status === "generating" ? <p className="empty">{stage}</p> : null}
 
@@ -76,11 +70,10 @@ export function ImageView() {
         <div className="image-result">
           <img className="generated-image" src={image.url} alt={image.brief.coreIdea} />
           <p className="eyebrow">
-            {image.usedReferences ? "Reference photos were used" : "No reference photos"} ·{" "}
-            {image.brief.aspectRatio}
+            {image.usedReferences ? m.image.usedRefs : m.image.noRefs} · {image.brief.aspectRatio}
           </p>
           <div className="band">
-            <p className="eyebrow">Creative brief</p>
+            <p className="eyebrow">{m.image.brief}</p>
             <p>{image.brief.communicationObjective}</p>
             <p>{image.brief.coreIdea}</p>
             <p>
@@ -91,9 +84,7 @@ export function ImageView() {
         </div>
       ) : null}
 
-      {status === "idle" && !image ? (
-        <p className="empty">No supporting image yet. Generate one from the current post.</p>
-      ) : null}
+      {status === "idle" && !image ? <p className="empty">{m.image.empty}</p> : null}
 
       <div className="actions">
         <button
@@ -102,7 +93,7 @@ export function ImageView() {
           disabled={status === "generating"}
           onClick={() => void generate()}
         >
-          {image ? "Retry image" : "Generate image"}
+          {image ? m.image.retry : m.image.generate}
         </button>
       </div>
     </div>

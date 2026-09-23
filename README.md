@@ -69,7 +69,7 @@ The API expects `DATABASE_URL` from `.env.example`.
 5. Write a post with story strategy, reviews, score, copy, and limited regeneration.
 6. Generate a supporting image from a creative brief. Retry the image without rewriting the post.
 
-The UI is English. Failures are retryable on the same step.
+The interface is available in English, Portuguese, and Spanish. Failures are retryable on the same step.
 
 ## Checks
 

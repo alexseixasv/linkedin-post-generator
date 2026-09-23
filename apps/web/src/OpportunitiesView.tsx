@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { ANGLE_LABELS, type OpportunitySetPublic } from "@studio/shared";
+import type { OpportunitySetPublic } from "@studio/shared";
 import {
   fetchOpportunities,
   generateOpportunities,
   selectOpportunity,
   type ApiError,
 } from "./api";
+import { useI18n } from "./i18n";
 
 export function OpportunitiesView({ onContinue }: { onContinue: () => void }) {
+  const { m, t } = useI18n();
   const [set, setSet] = useState<OpportunitySetPublic | null>(null);
   const [status, setStatus] = useState<"loading" | "idle" | "generating" | "selecting">(
     "loading",
@@ -59,20 +61,15 @@ export function OpportunitiesView({ onContinue }: { onContinue: () => void }) {
   }
 
   if (status === "loading") {
-    return <p className="empty">Loading opportunities…</p>;
+    return <p className="empty">{m.opportunities.loading}</p>;
   }
 
   return (
     <div>
-      <p className="lede">
-        Each card answers why this professional should discuss this event. Weak matches are
-        rejected. You must choose an angle before a post is written.
-      </p>
+      <p className="lede">{m.opportunities.lede}</p>
       {error ? <div className="error">{error}</div> : null}
 
-      {status === "generating" ? (
-        <p className="empty">Judging which events you can credibly discuss…</p>
-      ) : null}
+      {status === "generating" ? <p className="empty">{m.opportunities.generating}</p> : null}
 
       {set && status !== "generating" && set.opportunities.length > 0 ? (
         <div className="article-list">
@@ -82,8 +79,8 @@ export function OpportunitiesView({ onContinue }: { onContinue: () => void }) {
               key={opportunity.id}
             >
               <p className="eyebrow">
-                {opportunity.article.source} · match {opportunity.matchScore}% ·{" "}
-                {ANGLE_LABELS[opportunity.payload.angle]}
+                {opportunity.article.source} · {t("opportunities.match", { score: opportunity.matchScore })}{" "}
+                · {m.opportunities.angles[opportunity.payload.angle]}
               </p>
               <h3>{opportunity.payload.topic}</h3>
               <p>
@@ -92,19 +89,19 @@ export function OpportunitiesView({ onContinue }: { onContinue: () => void }) {
                 </a>
               </p>
               <p>
-                <strong>Why this fits you.</strong> {opportunity.payload.whyItFits}
+                <strong>{m.opportunities.whyFits}</strong> {opportunity.payload.whyItFits}
               </p>
               <p>
-                <strong>Why your audience may care.</strong> {opportunity.payload.audienceCare}
+                <strong>{m.opportunities.whyAudience}</strong> {opportunity.payload.audienceCare}
               </p>
               <p>
-                <strong>Thesis.</strong> {opportunity.payload.thesis}
+                <strong>{m.opportunities.thesis}</strong> {opportunity.payload.thesis}
               </p>
               <p>
-                <strong>Evidence.</strong> {opportunity.payload.evidence.join(" · ")}
+                <strong>{m.opportunities.evidence}</strong> {opportunity.payload.evidence.join(" · ")}
               </p>
               <p>
-                <strong>Credibility risk.</strong> {opportunity.payload.credibilityRisk}
+                <strong>{m.opportunities.risk}</strong> {opportunity.payload.credibilityRisk}
               </p>
               <button
                 className="btn primary"
@@ -112,7 +109,7 @@ export function OpportunitiesView({ onContinue }: { onContinue: () => void }) {
                 disabled={status === "selecting"}
                 onClick={() => void select(opportunity.id)}
               >
-                {opportunity.selected ? "Selected angle" : "Choose this angle"}
+                {opportunity.selected ? m.opportunities.selected : m.opportunities.choose}
               </button>
             </article>
           ))}
@@ -120,15 +117,10 @@ export function OpportunitiesView({ onContinue }: { onContinue: () => void }) {
       ) : null}
 
       {status === "idle" && set?.emptyReason === "NO_RELEVANT_TOPICS" ? (
-        <p className="empty">
-          None of the current events earned a credible angle. Discover different topics or add
-          stronger evidence to the profile.
-        </p>
+        <p className="empty">{m.opportunities.emptyRelevant}</p>
       ) : null}
 
-      {status === "idle" && !set ? (
-        <p className="empty">No opportunities yet. Generate them from the discovered events.</p>
-      ) : null}
+      {status === "idle" && !set ? <p className="empty">{m.opportunities.empty}</p> : null}
 
       <div className="actions">
         <button
@@ -137,11 +129,11 @@ export function OpportunitiesView({ onContinue }: { onContinue: () => void }) {
           disabled={status === "generating"}
           onClick={() => void generate()}
         >
-          {set ? "Regenerate opportunities" : "Generate opportunities"}
+          {set ? m.opportunities.regenerate : m.opportunities.generate}
         </button>
         {set?.selectedOpportunityId ? (
           <button className="btn ghost" type="button" onClick={onContinue}>
-            Continue to write
+            {m.opportunities.continueWrite}
           </button>
         ) : null}
       </div>
