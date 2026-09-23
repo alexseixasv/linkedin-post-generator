@@ -19,6 +19,7 @@ Implementation notes live in `docs/plans/mvp.md`. Slice learnings are in `docs/l
 - Decisions: `docs/decisions/`
 - Plans: `docs/plans/`
 - Learnings: `docs/learnings/`
+- Original brief: `docs/prompts/linkedin-post-generator-prompt.md`
 - Agents: `.agents/`
 - Skills: `.skills/`
 
