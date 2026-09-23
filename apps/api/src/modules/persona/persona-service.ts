@@ -14,6 +14,7 @@ import {
 import type { TextGenerationProvider } from "../ai/text-generation-provider.js";
 import type { ProfileService } from "../profile/profile-service.js";
 import { groundPersona } from "./ground-persona.js";
+import { normalizePersonaCandidate } from "./normalize-persona.js";
 import type { PersonaRepository } from "./persona-repository.js";
 
 export function buildPersonaPrompt(profile: ProfilePublic) {
@@ -48,7 +49,9 @@ export class PersonaService {
 
     const prompt = buildPersonaPrompt(profile);
     const generated = await this.text.generateText(prompt);
-    const parsed = personaPayloadSchema.safeParse(parseJsonObject(generated.text));
+    const parsed = personaPayloadSchema.safeParse(
+      normalizePersonaCandidate(parseJsonObject(generated.text)),
+    );
     if (!parsed.success) {
       throw malformedAiOutput(
         "The model returned a persona that did not match the required structure.",

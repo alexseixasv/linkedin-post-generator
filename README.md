@@ -37,6 +37,8 @@ Slice 4 is available: generate up to three content opportunities with Why this p
 
 Slice 5 is available: write a post from the selected angle, with story strategy, reviews, score, copy, and limited regeneration.
 
+Slice 6 is available: generate a supporting image from a creative brief and retry it without regenerating the post.
+
 Without Docker:
 
 ```bash

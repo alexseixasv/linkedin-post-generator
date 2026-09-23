@@ -27,13 +27,32 @@ PROCESS
 4. Write a positioning statement a peer would recognize.
 
 OUTPUT FORMAT
-Return a JSON object with exactly these keys:
-positioningStatement, coreExpertise, supportingExpertise, technologies, industries,
-careerNarrative, seniority, technicalDepth, leadershipExposure, differentiators,
-proofPoints (array of {claim, evidence}), targetAudience, desiredPerception,
-contentPillars, strongAuthorityTopics, credibleTopics, adjacentTopics, riskyTopics
-(each topic array item is {topic, evidence}), professionalKeywords,
-businessImpactThemes, repeatedCareerPatterns.
+Return one JSON object. Include every key. Use empty arrays when evidence is missing.
+Do not wrap the object. Do not use empty strings inside arrays.
+
+{
+  "positioningStatement": "string",
+  "coreExpertise": ["string"],
+  "supportingExpertise": [],
+  "technologies": [],
+  "industries": [],
+  "careerNarrative": "string",
+  "seniority": "Staff-plus",
+  "technicalDepth": "string",
+  "leadershipExposure": "string",
+  "differentiators": [],
+  "proofPoints": [{ "claim": "string", "evidence": "quote from the profile" }],
+  "targetAudience": "string",
+  "desiredPerception": "string",
+  "contentPillars": [],
+  "strongAuthorityTopics": [{ "topic": "string", "evidence": "quote from the profile" }],
+  "credibleTopics": [],
+  "adjacentTopics": [],
+  "riskyTopics": [],
+  "professionalKeywords": [],
+  "businessImpactThemes": [],
+  "repeatedCareerPatterns": []
+}
 
 QUALITY CRITERIA
 A credible peer of this professional should be able to say: "yes, that is this person."`;

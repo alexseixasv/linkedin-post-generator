@@ -6,6 +6,7 @@ import {
   type ProfileInput,
   type ProfilePublic,
 } from "@studio/shared";
+import { ImageView } from "./ImageView";
 import { OpportunitiesView } from "./OpportunitiesView";
 import { PersonaView } from "./PersonaView";
 import { PostView } from "./PostView";
@@ -30,6 +31,7 @@ const STEPS = [
   { id: "topics", label: "Topics" },
   { id: "opportunities", label: "Angles" },
   { id: "post", label: "Post" },
+  { id: "image", label: "Image" },
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];
@@ -127,7 +129,9 @@ export function App() {
                   ? "Why this post"
                   : step === "post"
                     ? "Publishable draft"
-                    : "Professional profile"}
+                    : step === "image"
+                      ? "Supporting image"
+                      : "Professional profile"}
           </p>
           <h2>
             {step === "persona"
@@ -138,7 +142,9 @@ export function App() {
                   ? "Pick a credible angle"
                   : step === "post"
                     ? "Write from the selected angle"
-                    : "Tell the system who you actually are"}
+                    : step === "image"
+                      ? "Art-direct the visual"
+                      : "Tell the system who you actually are"}
           </h2>
           <nav className="steps" aria-label="Profile sections">
             {STEPS.filter((item) => item.id !== "welcome").map((item) => (
@@ -158,7 +164,8 @@ export function App() {
           step !== "persona" &&
           step !== "topics" &&
           step !== "opportunities" &&
-          step !== "post" ? (
+          step !== "post" &&
+          step !== "image" ? (
             <div className="notice">{saved.evidenceWarning}</div>
           ) : null}
 
@@ -188,11 +195,13 @@ export function App() {
             <OpportunitiesView onContinue={() => setStep("post")} />
           ) : null}
           {step === "post" ? <PostView /> : null}
+          {step === "image" ? <ImageView /> : null}
 
           {step !== "persona" &&
           step !== "topics" &&
           step !== "opportunities" &&
-          step !== "post" ? (
+          step !== "post" &&
+          step !== "image" ? (
           <div className="actions">
             <button
               className="btn ghost"
@@ -234,8 +243,10 @@ export function App() {
                 type="button"
                 onClick={() =>
                   setStep(
-                    step === "post"
-                      ? "opportunities"
+                    step === "image"
+                      ? "post"
+                      : step === "post"
+                        ? "opportunities"
                       : step === "opportunities"
                         ? "topics"
                         : step === "topics"
@@ -258,6 +269,11 @@ export function App() {
                   onClick={() => setStep("opportunities")}
                 >
                   Continue to angles
+                </button>
+              ) : null}
+              {step === "post" ? (
+                <button className="btn primary" type="button" onClick={() => setStep("image")}>
+                  Continue to image
                 </button>
               ) : null}
             </div>
@@ -296,6 +312,7 @@ function Welcome({ onStart }: { onStart: () => void }) {
           <li>Discover current events matched to that authority, not to whatever is trending.</li>
           <li>Compare a few angles and choose one the profile can actually support.</li>
           <li>Write a post from that angle, then review claims before you copy it.</li>
+          <li>Generate a supporting image from a brief, then retry the image without losing the post.</li>
         </ul>
       </aside>
     </section>

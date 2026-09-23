@@ -10,6 +10,7 @@ OpenAI stays behind `TextGenerationProvider`. Empty API keys fail at generate ti
 
 - Prompt context must include experiences and skills, not photo URLs.
 - Malformed JSON is 422, not a saved half-persona.
+- Models often wrap the object, emit topic strings, or use seniority aliases. Normalize shape before the schema; still reject junk like `{"nope":true}`.
 - Provider outages must be retryable from the same screen.
 
 ## Next

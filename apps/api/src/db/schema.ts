@@ -1,4 +1,5 @@
 import {
+  boolean,
   integer,
   jsonb,
   pgTable,
@@ -8,6 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import type {
   FactReview,
+  ImageBrief,
   OpportunityPayload,
   PersonaPayload,
   QualityScore,
@@ -166,5 +168,23 @@ export const generatedPosts = pgTable("generated_posts", {
   factReview: jsonb("fact_review").$type<FactReview>().notNull(),
   seoReview: jsonb("seo_review").$type<SeoReview>().notNull(),
   quality: jsonb("quality").$type<QualityScore>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const generatedImages = pgTable("generated_images", {
+  id: uuid("id").primaryKey(),
+  profileId: uuid("profile_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  postId: uuid("post_id")
+    .notNull()
+    .references(() => generatedPosts.id, { onDelete: "cascade" }),
+  promptVersion: text("prompt_version").notNull(),
+  model: text("model").notNull(),
+  brief: jsonb("brief").$type<ImageBrief>().notNull(),
+  generationPrompt: text("generation_prompt").notNull(),
+  usedReferences: boolean("used_references").notNull().default(false),
+  storageKey: text("storage_key").notNull(),
+  mimeType: text("mime_type").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

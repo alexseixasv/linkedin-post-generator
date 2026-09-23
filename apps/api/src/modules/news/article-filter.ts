@@ -32,10 +32,31 @@ export function filterAndRankArticles(
 
 export function overlapScore(text: string, topics: string[]): number {
   const haystack = text.toLowerCase();
-  return topics.reduce((score, topic) => {
+  let score = 0;
+  for (const topic of topics) {
     const needle = topic.trim().toLowerCase();
-    return needle && haystack.includes(needle) ? score + 1 : score;
-  }, 0);
+    if (needle.length >= 3 && haystack.includes(needle)) {
+      score += 2;
+    }
+  }
+  for (const token of topicTokens(topics)) {
+    if (haystack.includes(token)) {
+      score += 1;
+    }
+  }
+  return score;
+}
+
+export function topicTokens(topics: string[]): string[] {
+  const tokens = new Set<string>();
+  for (const topic of topics) {
+    for (const part of topic.toLowerCase().split(/[^a-z0-9+#]+/)) {
+      if (part.length >= 3 && !["with", "from", "that", "this", "and", "the"].includes(part)) {
+        tokens.add(part);
+      }
+    }
+  }
+  return [...tokens];
 }
 
 function isUsableArticle(article: NormalizedNewsArticle): boolean {

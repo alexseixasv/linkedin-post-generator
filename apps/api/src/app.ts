@@ -5,7 +5,11 @@ import Fastify from "fastify";
 import type { Env } from "./env.js";
 import { AppError } from "./app-error.js";
 import type { Database } from "./db/client.js";
+import { OpenAIImageGenerationProvider } from "./modules/ai/openai-image-generation-provider.js";
 import { OpenAITextGenerationProvider } from "./modules/ai/openai-text-generation-provider.js";
+import { registerImageRoutes } from "./modules/images/image-routes.js";
+import { ImageRepository } from "./modules/images/image-repository.js";
+import { ImageService } from "./modules/images/image-service.js";
 import { NewsApiNewsProvider } from "./modules/news/newsapi-adapter.js";
 import { registerOpportunityRoutes } from "./modules/opportunities/opportunity-routes.js";
 import { OpportunityRepository } from "./modules/opportunities/opportunity-repository.js";
@@ -68,6 +72,14 @@ export async function buildApp(env: Env, db: Database) {
     new PostRepository(db),
     text,
   );
+  const images = new ImageService(
+    profiles,
+    posts,
+    new ImageRepository(db),
+    storage,
+    text,
+    new OpenAIImageGenerationProvider(env.OPENAI_API_KEY, env.OPENAI_IMAGE_MODEL),
+  );
 
   app.get("/health", async () => ({ ok: true }));
 
@@ -76,6 +88,7 @@ export async function buildApp(env: Env, db: Database) {
   await registerResearchRoutes(app, research);
   await registerOpportunityRoutes(app, opportunities);
   await registerPostRoutes(app, posts);
+  await registerImageRoutes(app, images);
 
   app.setErrorHandler((error, _request, reply) => {
     if (error instanceof AppError) {

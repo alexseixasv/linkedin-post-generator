@@ -46,3 +46,5 @@ A stage classified as deterministic, AI, or hybrid, with validation and failure 
 Discovery already showed the pattern: news fetch is software, relevance is hybrid, writing and image direction are AI, persistence and uploads are software.
 
 Slice 5: story and draft are AI; claim support is software. A model cannot revive an article fact with a different URL.
+
+Slice 6: brief and image prompt are AI; rejecting a prompt that repeats the post body is software. Persistence is StorageProvider, not a vendor URL.

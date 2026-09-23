@@ -72,3 +72,13 @@ export {
   type PostLength,
   type WritingTone,
 } from "./constants.js";
+export {
+  IMAGE_ASPECT_RATIOS,
+  IMAGE_PROMPT_VERSION,
+  generatedImagePublicSchema,
+  imageBriefSchema,
+  modelImagePromptSchema,
+  type GeneratedImagePublic,
+  type ImageAspectRatio,
+  type ImageBrief,
+} from "./image.js";

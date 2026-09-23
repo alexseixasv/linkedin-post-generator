@@ -21,6 +21,9 @@ export const PREFERRED_NEWS_DOMAINS = [
   "arstechnica.com",
   "techcrunch.com",
   "martinfowler.com",
+  "react.dev",
+  "blog.vuejs.org",
+  "nextjs.org",
 ];
 
 type NewsApiRawArticle = {
@@ -131,7 +134,12 @@ export function toNewsQuery(topics: string[]): string {
   const clauses = topics
     .map((topic) => topic.trim().replaceAll('"', ""))
     .filter(Boolean)
-    .map((topic) => `"${topic}"`);
-  const joined = clauses.join(" OR ");
-  return joined.slice(0, 500);
+    .map((topic) => {
+      const words = topic.split(/\s+/).filter(Boolean);
+      if (words.length <= 3) {
+        return `"${topic}"`;
+      }
+      return `(${words.join(" AND ")})`;
+    });
+  return clauses.join(" OR ").slice(0, 500);
 }

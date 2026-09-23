@@ -11,13 +11,39 @@ const STOP = new Set([
   "engineering",
   "technology",
   "professional",
+  "modern",
+  "architecture",
+  "optimization",
+  "frameworks",
+  "native",
+  "stack",
+  "driven",
+  "asynchronous",
+  "event",
 ]);
+
+export function compactSearchTerm(topic: string): string[] {
+  const cleaned = topic.trim().replaceAll('"', "");
+  const extras = [...cleaned.matchAll(/\(([^)]+)\)/g)].flatMap((match) =>
+    (match[1] ?? "").split(/[,/]+/).map((part) => part.trim()),
+  );
+  const head = cleaned
+    .replace(/\([^)]*\)/g, " ")
+    .split(/[\s,/|]+/)
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 2 && !STOP.has(part.toLowerCase()));
+
+  const phrases =
+    head.length <= 4 && cleaned.length <= 48 ? [head.join(" ")] : [head.slice(0, 3).join(" ")];
+
+  return [...phrases, ...extras].map((item) => item.trim()).filter((item) => item.length >= 2);
+}
 
 export function buildSearchTopics(persona: PersonaPayload, limit = 8): string[] {
   const ranked = [
+    ...persona.technologies,
     ...persona.strongAuthorityTopics.map((item) => item.topic),
     ...persona.coreExpertise,
-    ...persona.technologies,
     ...persona.contentPillars,
     ...persona.professionalKeywords,
     ...persona.credibleTopics.map((item) => item.topic),
@@ -25,22 +51,23 @@ export function buildSearchTopics(persona: PersonaPayload, limit = 8): string[] 
   ];
 
   const blocked = new Set(
-    persona.riskyTopics.map((item) => item.topic.trim().toLowerCase()),
+    persona.riskyTopics.flatMap((item) => compactSearchTerm(item.topic).map((term) => term.toLowerCase())),
   );
 
   const unique: string[] = [];
   const seen = new Set<string>();
 
   for (const raw of ranked) {
-    const topic = raw.trim().replaceAll('"', "");
-    const key = topic.toLowerCase();
-    if (topic.length < 3 || STOP.has(key) || blocked.has(key) || seen.has(key)) {
-      continue;
-    }
-    seen.add(key);
-    unique.push(topic);
-    if (unique.length >= limit) {
-      break;
+    for (const topic of compactSearchTerm(raw)) {
+      const key = topic.toLowerCase();
+      if (STOP.has(key) || blocked.has(key) || seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      unique.push(topic);
+      if (unique.length >= limit) {
+        return unique;
+      }
     }
   }
 

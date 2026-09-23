@@ -42,3 +42,18 @@ test("drops zero-overlap and invalid articles", () => {
   assert.equal(kept.length, 1);
   assert.match(kept[0]?.title ?? "", /Kubernetes/);
 });
+
+test("matches a concrete article against a long persona topic", () => {
+  const kept = filterAndRankArticles(
+    [
+      article({
+        title: "React 19 is now stable",
+        description: "The React team released a new version.",
+        url: "https://react.dev/blog/react-19",
+        providerArticleId: "https://react.dev/blog/react-19",
+      }),
+    ],
+    ["React.js", "TypeScript"],
+  );
+  assert.equal(kept.length, 1);
+});

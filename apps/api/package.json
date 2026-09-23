@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
-    "test": "tsx --test src/modules/uploads/local-storage.test.ts src/modules/profile/profile-service.test.ts src/modules/ai/parse-json.test.ts src/modules/ai/openai-error.test.ts src/modules/persona/persona-service.test.ts src/modules/news/newsapi-adapter.test.ts src/modules/news/search-topics.test.ts src/modules/news/article-filter.test.ts src/modules/opportunities/relevance.test.ts src/modules/opportunities/ground-opportunities.test.ts src/modules/opportunities/opportunity-service.test.ts src/modules/posts/ground-post.test.ts src/modules/posts/post-service.test.ts",
+    "test": "tsx --test src/modules/uploads/local-storage.test.ts src/modules/profile/profile-service.test.ts src/modules/ai/parse-json.test.ts src/modules/ai/openai-error.test.ts src/modules/ai/openai-image-generation-provider.test.ts src/modules/persona/normalize-persona.test.ts src/modules/persona/persona-service.test.ts src/modules/news/newsapi-adapter.test.ts src/modules/news/search-topics.test.ts src/modules/news/article-filter.test.ts src/modules/opportunities/relevance.test.ts src/modules/opportunities/ground-opportunities.test.ts src/modules/opportunities/opportunity-service.test.ts src/modules/posts/ground-post.test.ts src/modules/posts/post-service.test.ts src/modules/images/ground-image.test.ts src/modules/images/image-service.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "node -e \"process.exit(0)\""
   },

@@ -34,3 +34,23 @@ test("builds queries from authority not from risky topics", () => {
   assert.ok(topics.includes("Kubernetes"));
   assert.equal(topics.includes("Quantum computing"), false);
 });
+
+test("compacts long persona phrases into searchable terms", () => {
+  const topics = buildSearchTopics(
+    persona({
+      technologies: ["TypeScript"],
+      strongAuthorityTopics: [
+        {
+          topic: "Modern frontend frameworks (Vue.js, React.js, TypeScript)",
+          evidence: "Repeated frontend work",
+        },
+      ],
+    }),
+  );
+  assert.ok(topics.includes("TypeScript"));
+  assert.ok(topics.includes("Vue.js") || topics.includes("React.js"));
+  assert.equal(
+    topics.some((topic) => topic.includes("Modern frontend frameworks (Vue.js")),
+    false,
+  );
+});

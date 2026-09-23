@@ -5,7 +5,7 @@ import type { ProfileService } from "../profile/profile-service.js";
 import { filterAndRankArticles } from "./article-filter.js";
 import type { NewsProvider } from "./news-provider.js";
 import type { ResearchRepository } from "./research-repository.js";
-import { buildSearchTopics, languageCode } from "./search-topics.js";
+import { buildSearchTopics } from "./search-topics.js";
 
 export class ResearchService {
   constructor(
@@ -44,7 +44,7 @@ export class ResearchService {
     const raw = await this.news.searchNews({
       topics: queryTopics,
       from,
-      language: languageCode(profile.preferredLanguage),
+      language: "en",
     });
     const articles = filterAndRankArticles(raw, queryTopics);
     const record = await this.research.create({

@@ -1,5 +1,6 @@
 import type {
   AngleType,
+  GeneratedImagePublic,
   OpportunitySetPublic,
   PersonaPublic,
   PostPublic,
@@ -180,6 +181,24 @@ export function changePostAngle(angle: AngleType): Promise<PostPublic> {
 
 export function rewritePostSection(section: string): Promise<PostPublic> {
   return postAction("/api/posts/rewrite", { section });
+}
+
+export async function fetchImage(): Promise<GeneratedImagePublic | null> {
+  const response = await fetch("/api/images");
+  if (!response.ok) {
+    throw await parseError(response);
+  }
+  const body = (await response.json()) as { image: GeneratedImagePublic | null };
+  return body.image;
+}
+
+export async function generateImage(): Promise<GeneratedImagePublic> {
+  const response = await fetch("/api/images/generate", { method: "POST" });
+  if (!response.ok) {
+    throw await parseError(response);
+  }
+  const body = (await response.json()) as { image: GeneratedImagePublic };
+  return body.image;
 }
 
 export function emptyProfile(): ProfileInput {

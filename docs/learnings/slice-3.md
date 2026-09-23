@@ -6,6 +6,8 @@ News discovery is retrieval, not generation. Queries come from strong and credib
 
 Preferred domains are a first pass. An empty quality-domain result may widen, but the overlap filter still runs.
 
+Quoted NewsAPI phrases must be short. Long persona labels like "modern frontend frameworks (Vue.js, React.js)" return zero hits. Compact to searchable terms and score overlap by tokens.
+
 ## Reviewer notes
 
 - Do not invent headlines when the provider is down.

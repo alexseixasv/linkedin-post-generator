@@ -433,6 +433,16 @@ textarea {
   color: var(--copper);
 }
 
+.generated-image {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  margin: 12px 0 16px;
+  background: #fff;
+}
+
 @media (max-width: 840px) {
   .hero,
   .grid-2,

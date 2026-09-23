@@ -48,3 +48,5 @@ Slice 2: persona JSON is grounded after validation. Thin profiles cannot keep a 
 Slice 4: opportunity evaluations are grounded after validation. keep=false, unknown articleIds, empty evidence, and risky topics are dropped. The set is not padded to three.
 
 Slice 5: draft and review JSON are validated separately. A failed review does not keep an unreviewed draft.
+
+Slice 6: brief and image-prompt JSON are validated separately. A prompt that repeats the post body is rejected before the image provider runs.

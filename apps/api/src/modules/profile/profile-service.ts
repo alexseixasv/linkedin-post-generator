@@ -95,6 +95,23 @@ export class ProfileService {
     return profile;
   }
 
+  async listReferenceImages(): Promise<Array<{ bytes: Buffer; mimeType: string }>> {
+    const profile = await this.getProfile();
+    if (!profile) {
+      return [];
+    }
+    const files: Array<{ bytes: Buffer; mimeType: string }> = [];
+    for (const photo of profile.photos) {
+      try {
+        const object = await this.getPhotoFile(photo.id);
+        files.push({ bytes: object.bytes, mimeType: object.mimeType });
+      } catch {
+        // A missing file should not block image generation from the remaining references.
+      }
+    }
+    return files;
+  }
+
   async getPhotoFile(photoId: string) {
     const photo = await this.repo.getPhoto(photoId);
     if (!photo) {
