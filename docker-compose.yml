@@ -53,9 +53,12 @@ services:
       - api
     environment:
       API_PROXY_TARGET: http://api:3000
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "300"
     volumes:
       - ./apps/web/src:/app/apps/web/src
       - ./apps/web/index.html:/app/apps/web/index.html
+      - ./apps/web/vite.config.ts:/app/apps/web/vite.config.ts
       - ./packages/shared/src:/app/packages/shared/src
     ports:
       - "5173:5173"

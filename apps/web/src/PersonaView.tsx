@@ -159,7 +159,7 @@ function Band({
       {items.length === 0 ? <p className="empty">{m.common.none}</p> : null}
       {items.map((item) => (
         <p key={item.topic}>
-          {item.topic}
+          <span className="tag">{item.topic}</span>
           <br />
           <span className="eyebrow">{item.evidence}</span>
         </p>

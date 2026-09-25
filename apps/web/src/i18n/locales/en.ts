@@ -125,9 +125,16 @@ export const en = {
     preferredLanguage: "Preferred writing language",
     about: "About",
     topSkills: "Top skills",
+    topSkillsHint: "Suggestions follow the interface language. Type your own skill if it is not listed.",
     technologies: "Technologies",
-    industries: "Industries",
+    technologiesHint: "Suggestions follow the interface language. Type your own technology if it is not listed.",
+    industries: "LinkedIn industry",
+    industriesHint:
+      "Official LinkedIn Industry Codes V2, shown in the interface language. Not a free-form market label.",
     tagPlaceholder: "Type and press Enter",
+    searchPlaceholder: "Search or type",
+    industryPlaceholder: "Search LinkedIn industries",
+    noMatches: "No matches",
   },
   experience: {
     empty: "Add roles that can later justify a professional point of view.",

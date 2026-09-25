@@ -127,9 +127,16 @@ export const es: Messages = {
     preferredLanguage: "Idioma preferido de escritura",
     about: "Acerca de",
     topSkills: "Principales skills",
+    topSkillsHint: "Las sugerencias siguen el idioma de la interfaz. Escribe tu skill si no está en la lista.",
     technologies: "Tecnologías",
-    industries: "Industrias",
+    technologiesHint: "Las sugerencias siguen el idioma de la interfaz. Escribe tu tecnología si no está en la lista.",
+    industries: "Industria de LinkedIn",
+    industriesHint:
+      "Lista oficial Industry Codes V2, en el idioma de la interfaz. No es un sector de mercado libre.",
     tagPlaceholder: "Escribe y pulsa Enter",
+    searchPlaceholder: "Busca o escribe",
+    industryPlaceholder: "Busca industrias de LinkedIn",
+    noMatches: "Sin resultados",
   },
   experience: {
     empty: "Añade cargos que luego justifiquen un punto de vista profesional.",

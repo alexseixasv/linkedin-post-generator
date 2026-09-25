@@ -70,7 +70,7 @@ export const pt: Messages = {
   },
   welcome: {
     eyebrow: "Não é um gerador genérico de posts",
-    title: "Escreva a partir da autoridade que você realmente tem.",
+    title: "Pots no LinkedIn a partir do seu perfil profissional.",
     lede: "Comece pelo seu histórico real. O estúdio então busca eventos atuais de tecnologia que você tem motivo crível para discutir — e ajuda a transformar um deles em um post e uma imagem de apoio.",
     cta: "Montar o seu perfil profissional",
     journeyEyebrow: "A jornada",
@@ -127,9 +127,16 @@ export const pt: Messages = {
     preferredLanguage: "Idioma preferido da escrita",
     about: "Sobre",
     topSkills: "Principais skills",
+    topSkillsHint: "As sugestões seguem o idioma da interface. Digite a sua skill se ela não estiver na lista.",
     technologies: "Tecnologias",
-    industries: "Indústrias",
+    technologiesHint: "As sugestões seguem o idioma da interface. Digite a sua tecnologia se ela não estiver na lista.",
+    industries: "Indústria do LinkedIn",
+    industriesHint:
+      "Lista oficial Industry Codes V2, no idioma da interface. Não é um setor de mercado livre.",
     tagPlaceholder: "Digite e pressione Enter",
+    searchPlaceholder: "Busque ou digite",
+    industryPlaceholder: "Busque indústrias do LinkedIn",
+    noMatches: "Nenhum resultado",
   },
   experience: {
     empty: "Adicione cargos que depois justifiquem um ponto de vista profissional.",

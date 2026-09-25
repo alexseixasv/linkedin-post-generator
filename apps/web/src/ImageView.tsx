@@ -69,9 +69,10 @@ export function ImageView() {
       {image && status !== "generating" ? (
         <div className="image-result">
           <img className="generated-image" src={image.url} alt={image.brief.coreIdea} />
-          <p className="eyebrow">
-            {image.usedReferences ? m.image.usedRefs : m.image.noRefs} · {image.brief.aspectRatio}
-          </p>
+          <div className="tags">
+            <span className="tag">{image.usedReferences ? m.image.usedRefs : m.image.noRefs}</span>
+            <span className="tag">{image.brief.aspectRatio}</span>
+          </div>
           <div className="band">
             <p className="eyebrow">{m.image.brief}</p>
             <p>{image.brief.communicationObjective}</p>

@@ -1,0 +1,32 @@
+import { sameTerm, type LocalizedTerm } from "./localized";
+
+/** Practical skill suggestions. Not a closed LinkedIn skill catalog. */
+export const SKILL_SUGGESTIONS: readonly LocalizedTerm[] = [
+  sameTerm("Amazon Web Services"),
+  { en: "API Design", pt: "Design de APIs", es: "Diseño de APIs" },
+  { en: "Backend Development", pt: "Desenvolvimento backend", es: "Desarrollo backend" },
+  sameTerm("CI/CD"),
+  { en: "Cloud Architecture", pt: "Arquitetura de nuvem", es: "Arquitectura en la nube" },
+  { en: "Communication", pt: "Comunicação", es: "Comunicación" },
+  { en: "Data Modeling", pt: "Modelagem de dados", es: "Modelado de datos" },
+  sameTerm("DevOps"),
+  { en: "Distributed Systems", pt: "Sistemas distribuídos", es: "Sistemas distribuidos" },
+  sameTerm("Docker"),
+  { en: "Engineering Management", pt: "Gestão de engenharia", es: "Gestión de ingeniería" },
+  { en: "Frontend Development", pt: "Desenvolvimento frontend", es: "Desarrollo frontend" },
+  sameTerm("GraphQL"),
+  sameTerm("JavaScript"),
+  sameTerm("Kubernetes"),
+  { en: "Machine Learning", pt: "Aprendizado de máquina", es: "Aprendizaje automático" },
+  sameTerm("Node.js"),
+  sameTerm("PostgreSQL"),
+  { en: "Product Management", pt: "Gestão de produto", es: "Gestión de producto" },
+  sameTerm("Python"),
+  sameTerm("React.js"),
+  { en: "Software Architecture", pt: "Arquitetura de software", es: "Arquitectura de software" },
+  { en: "System Design", pt: "Design de sistemas", es: "Diseño de sistemas" },
+  { en: "Technical Leadership", pt: "Liderança técnica", es: "Liderazgo técnico" },
+  { en: "Technical Writing", pt: "Escrita técnica", es: "Redacción técnica" },
+  sameTerm("TypeScript"),
+  sameTerm("Vue.js"),
+];

@@ -14,6 +14,10 @@ import { PostView } from "./PostView";
 import { TopicsView } from "./TopicsView";
 import { WelcomeView } from "./WelcomeView";
 import { useI18n, type Messages } from "./i18n";
+import { matchTerm, termLabel, type LocalizedTerm } from "./suggestions/localized";
+import { LINKEDIN_INDUSTRIES } from "./suggestions/linkedin-industries";
+import { SKILL_SUGGESTIONS } from "./suggestions/skills";
+import { TECHNOLOGY_SUGGESTIONS } from "./suggestions/technologies";
 import {
   deletePhoto,
   emptyProfile,
@@ -328,21 +332,28 @@ function IdentityForm({
           onChange={(event) => onChange({ ...profile, about: event.target.value })}
         />
       </Field>
-      <Field className="full" label={m.identity.topSkills}>
+      <Field className="full" label={m.identity.topSkills} hint={m.identity.topSkillsHint}>
         <TagInput
           values={profile.topSkills}
+          suggestions={SKILL_SUGGESTIONS}
+          placeholder={m.identity.searchPlaceholder}
           onChange={(topSkills) => onChange({ ...profile, topSkills })}
         />
       </Field>
-      <Field className="full" label={m.identity.technologies}>
+      <Field className="full" label={m.identity.technologies} hint={m.identity.technologiesHint}>
         <TagInput
           values={profile.technologies}
+          suggestions={TECHNOLOGY_SUGGESTIONS}
+          placeholder={m.identity.searchPlaceholder}
           onChange={(technologies) => onChange({ ...profile, technologies })}
         />
       </Field>
-      <Field className="full" label={m.identity.industries}>
+      <Field className="full" label={m.identity.industries} hint={m.identity.industriesHint}>
         <TagInput
           values={profile.industries}
+          suggestions={LINKEDIN_INDUSTRIES}
+          allowCustom={false}
+          placeholder={m.identity.industryPlaceholder}
           onChange={(industries) => onChange({ ...profile, industries })}
         />
       </Field>
@@ -415,6 +426,8 @@ function ExperienceForm({
             <Field className="full" label={m.experience.roleTech}>
               <TagInput
                 values={experience.technologies}
+                suggestions={TECHNOLOGY_SUGGESTIONS}
+                placeholder={m.identity.searchPlaceholder}
                 onChange={(technologies) =>
                   updateExperience(profile, onChange, index, { technologies })
                 }
@@ -653,16 +666,19 @@ function PhotoForm({
 
 function Field({
   label,
+  hint,
   children,
   className,
 }: {
   label: string;
+  hint?: string;
   children: ReactNode;
   className?: string;
 }) {
   return (
     <label className={className ? `field ${className}` : "field"}>
       {label}
+      {hint ? <span className="field-hint">{hint}</span> : null}
       {children}
     </label>
   );
@@ -671,46 +687,140 @@ function Field({
 function TagInput({
   values,
   onChange,
+  suggestions,
+  allowCustom = true,
+  placeholder,
 }: {
   values: string[];
   onChange: (values: string[]) => void;
+  suggestions?: readonly LocalizedTerm[];
+  allowCustom?: boolean;
+  placeholder?: string;
 }) {
-  const { m } = useI18n();
+  const { locale, m } = useI18n();
   const [draft, setDraft] = useState("");
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
   const unique = values;
+  const query = draft.trim().toLowerCase();
 
-  function add() {
-    const next = draft.trim();
-    if (!next || unique.includes(next)) {
+  function isTaken(term: LocalizedTerm) {
+    return unique.some((value) => matchTerm(value, [term]));
+  }
+
+  function labelFor(value: string) {
+    if (!suggestions) return value;
+    return matchTerm(value, suggestions)?.[locale] ?? value;
+  }
+
+  const matches =
+    suggestions && query.length > 0
+      ? suggestions
+          .filter((item) => !isTaken(item))
+          .filter((item) => `${item.en} ${item.pt} ${item.es}`.toLowerCase().includes(query))
+          .slice(0, 8)
+      : [];
+  const showList = open && query.length > 0 && suggestions !== undefined;
+
+  function addValue(next: string) {
+    const value = next.trim();
+    if (!value || unique.some((item) => labelFor(item).toLowerCase() === value.toLowerCase() || item.toLowerCase() === value.toLowerCase())) {
       setDraft("");
+      setOpen(false);
       return;
     }
-    onChange([...unique, next]);
+    onChange([...unique, value]);
     setDraft("");
+    setOpen(false);
+    setActive(0);
+  }
+
+  function addTerm(term: LocalizedTerm) {
+    addValue(term.en);
+  }
+
+  function addDraft() {
+    if (showList && matches[active]) {
+      addTerm(matches[active]);
+      return;
+    }
+    const exact = suggestions?.find(
+      (item) => item.en.toLowerCase() === query || item.pt.toLowerCase() === query || item.es.toLowerCase() === query,
+    );
+    if (exact) {
+      addTerm(exact);
+      return;
+    }
+    if (allowCustom) addValue(draft);
   }
 
   return (
     <div>
-      <div className="tag-row">
-        <input
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              add();
-            }
-          }}
-          placeholder={m.identity.tagPlaceholder}
-        />
-        <button className="btn ghost" type="button" onClick={add}>
-          {m.common.add}
-        </button>
+      <div className="suggest">
+        <div className="tag-row">
+          <input
+            value={draft}
+            role="combobox"
+            aria-expanded={showList}
+            aria-autocomplete="list"
+            onChange={(event) => {
+              setDraft(event.target.value);
+              setOpen(true);
+              setActive(0);
+            }}
+            onFocus={() => setOpen(true)}
+            onBlur={() => setOpen(false)}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowDown" && matches.length > 0) {
+                event.preventDefault();
+                setOpen(true);
+                setActive((index) => (index + 1) % matches.length);
+                return;
+              }
+              if (event.key === "ArrowUp" && matches.length > 0) {
+                event.preventDefault();
+                setActive((index) => (index - 1 + matches.length) % matches.length);
+                return;
+              }
+              if (event.key === "Escape") {
+                setOpen(false);
+                return;
+              }
+              if (event.key === "Enter") {
+                event.preventDefault();
+                addDraft();
+              }
+            }}
+            placeholder={placeholder ?? m.identity.tagPlaceholder}
+          />
+          <button className="btn ghost" type="button" onClick={addDraft}>
+            {m.common.add}
+          </button>
+        </div>
+        {showList ? (
+          <ul className="suggest-list" role="listbox">
+            {matches.length === 0 ? <li className="suggest-empty">{m.identity.noMatches}</li> : null}
+            {matches.map((item, index) => (
+              <li key={item.en}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={index === active}
+                  className={index === active ? "active" : undefined}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => addTerm(item)}
+                >
+                  {termLabel(item, locale)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
       <div className="tags">
         {unique.map((value) => (
           <span className="tag" key={value}>
-            {value}
+            {labelFor(value)}
             <button type="button" onClick={() => onChange(unique.filter((item) => item !== value))}>
               ×
             </button>

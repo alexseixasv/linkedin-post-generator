@@ -59,9 +59,12 @@ export function TopicsView() {
         <div className="article-list">
           {research.articles.map((article) => (
             <article className="article-card" key={article.id}>
-              <p className="eyebrow">
-                {article.source} · {new Date(article.publishedAt).toLocaleDateString(dateLocale)}
-              </p>
+              <div className="tags">
+                <span className="tag">{article.source}</span>
+                <span className="tag">
+                  {new Date(article.publishedAt).toLocaleDateString(dateLocale)}
+                </span>
+              </div>
               <h3>
                 <a href={article.url} target="_blank" rel="noreferrer">
                   {article.title}

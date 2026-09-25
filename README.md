@@ -15,12 +15,13 @@ Implementation notes live in `docs/plans/mvp.md`. Slice learnings are in `docs/l
 ## Knowledge
 
 - Product: `docs/product/`
+- Visual identity: `docs/design/design.md`
 - Architecture: `docs/architecture/`
 - Decisions: `docs/decisions/`
 - Plans: `docs/plans/`
 - Learnings: `docs/learnings/`
 - Original brief: `docs/prompts/linkedin-post-generator-prompt.md`
-- Agents: `.agents/`
+- Agents: `.agents/` (briefs) and `.cursor/agents/` (Cursor subagents)
 - Skills: `.skills/`
 
 ## Local run
@@ -40,7 +41,7 @@ Then:
 docker compose up --build
 ```
 
-Open `http://localhost:5173`.
+Open `http://localhost:5173`. UI edits in `apps/web` reload through Vite polling, including when the app runs in Docker on Windows.
 
 After changing `.env`, recreate the API so the container rereads the keys:
 

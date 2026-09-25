@@ -4,6 +4,8 @@
 
 Make complex AI workflows feel simple, understandable and controllable.
 
+Visual treatment follows `docs/design/design.md`. Propose structure and states first, then express them with that identity. Do not introduce a second visual language.
+
 ## Core Principle
 
 Users should understand:

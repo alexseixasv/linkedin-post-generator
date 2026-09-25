@@ -1,0 +1,14 @@
+---
+description: Use the Content Studio visual identity for frontend work
+globs: apps/web/**/*.{tsx,ts,css,html}
+alwaysApply: false
+---
+
+# Visual identity
+
+Before changing UI in `apps/web`, read `docs/design/design.md`.
+
+- Tokens, type, radius, and components come from that file.
+- Do not mention or reuse another company's brand.
+- Do not extend the leftover paper / copper / Fraunces look.
+- User-facing copy lives in `apps/web/src/i18n` (en, pt, es).

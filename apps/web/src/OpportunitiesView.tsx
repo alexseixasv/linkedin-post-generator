@@ -78,10 +78,13 @@ export function OpportunitiesView({ onContinue }: { onContinue: () => void }) {
               className={opportunity.selected ? "article-card selected" : "article-card"}
               key={opportunity.id}
             >
-              <p className="eyebrow">
-                {opportunity.article.source} · {t("opportunities.match", { score: opportunity.matchScore })}{" "}
-                · {m.opportunities.angles[opportunity.payload.angle]}
-              </p>
+              <p className="eyebrow">{opportunity.article.source}</p>
+              <div className="tags">
+                <span className="tag">{m.opportunities.angles[opportunity.payload.angle]}</span>
+                <span className="tag">
+                  {t("opportunities.match", { score: opportunity.matchScore })}
+                </span>
+              </div>
               <h3>{opportunity.payload.topic}</h3>
               <p>
                 <a href={opportunity.article.url} target="_blank" rel="noreferrer">
@@ -104,7 +107,7 @@ export function OpportunitiesView({ onContinue }: { onContinue: () => void }) {
                 <strong>{m.opportunities.risk}</strong> {opportunity.payload.credibilityRisk}
               </p>
               <button
-                className="btn primary"
+                className={opportunity.selected ? "btn selected" : "btn ghost"}
                 type="button"
                 disabled={status === "selecting"}
                 onClick={() => void select(opportunity.id)}

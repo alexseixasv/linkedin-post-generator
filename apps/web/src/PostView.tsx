@@ -103,10 +103,11 @@ export function PostView() {
 
       {post && status !== "generating" ? (
         <div className="post-result">
-          <p className="eyebrow">
-            {m.opportunities.angles[post.angle]} · {m.writing.tones[post.tone]} ·{" "}
-            {t("post.score", { score: post.quality.score })}
-          </p>
+          <div className="tags">
+            <span className="tag">{m.opportunities.angles[post.angle]}</span>
+            <span className="tag">{m.writing.tones[post.tone]}</span>
+            <span className="tag">{t("post.score", { score: post.quality.score })}</span>
+          </div>
           <p className="post-body">{post.body}</p>
           <p>
             {m.post.source}{" "}
@@ -178,27 +179,35 @@ export function PostView() {
               {m.post.altHook}
             </button>
           </div>
-          <div className="grid-2">
-            <label className="field">
-              {m.post.tone}
-              <select value={tone} onChange={(event) => setTone(event.target.value as WritingTone)}>
-                {WRITING_TONES.map((item) => (
-                  <option key={item} value={item}>
-                    {m.writing.tones[item]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              {m.post.angle}
-              <select value={angle} onChange={(event) => setAngle(event.target.value as AngleType)}>
-                {ANGLE_TYPES.map((item) => (
-                  <option key={item} value={item}>
-                    {m.opportunities.angles[item]}
-                  </option>
-                ))}
-              </select>
-            </label>
+          <div className="field">
+            {m.post.tone}
+            <div className="pills">
+              {WRITING_TONES.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={tone === item ? "pill selected" : "pill"}
+                  onClick={() => setTone(item)}
+                >
+                  {m.writing.tones[item]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="field">
+            {m.post.angle}
+            <div className="pills">
+              {ANGLE_TYPES.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={angle === item ? "pill selected" : "pill"}
+                  onClick={() => setAngle(item)}
+                >
+                  {m.opportunities.angles[item]}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="actions">
             <button
