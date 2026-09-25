@@ -14,8 +14,18 @@ import { PostView } from "./PostView";
 import { TopicsView } from "./TopicsView";
 import { WelcomeView } from "./WelcomeView";
 import { useI18n, type Messages } from "./i18n";
-import { matchTerm, termLabel, type LocalizedTerm } from "./suggestions/localized";
+import { matchTerm, sameTerm, termLabel, type LocalizedTerm } from "./suggestions/localized";
 import { LINKEDIN_INDUSTRIES } from "./suggestions/linkedin-industries";
+import {
+  AUDIENCES,
+  audienceLabel,
+  audienceValue,
+  interestIdentity,
+  interestLabel,
+  parseAudienceValue,
+  selectedIncludes,
+  suggestedInterests,
+} from "./suggestions/positioning-topics";
 import { SKILL_SUGGESTIONS } from "./suggestions/skills";
 import { TECHNOLOGY_SUGGESTIONS } from "./suggestions/technologies";
 import {
@@ -392,41 +402,53 @@ function ExperienceForm({
               />
             </Field>
             <Field label={m.experience.start}>
-              <input
-                value={experience.startPeriod}
-                onChange={(event) =>
-                  updateExperience(profile, onChange, index, { startPeriod: event.target.value })
+              <MonthYearSelect
+                value={monthValue(experience.startPeriod)}
+                max={currentMonth()}
+                onChange={(startPeriod) =>
+                  updateExperience(profile, onChange, index, { startPeriod })
                 }
               />
             </Field>
-            <Field label={m.experience.end}>
-              <input
-                value={experience.endPeriod}
-                onChange={(event) =>
-                  updateExperience(profile, onChange, index, { endPeriod: event.target.value })
-                }
+            <div className="field">
+              <span>{m.experience.end}</span>
+              <MonthYearSelect
+                value={monthValue(experience.endPeriod)}
+                min={monthValue(experience.startPeriod) || undefined}
+                max={currentMonth()}
+                disabled={experience.endPeriod === PRESENT_PERIOD}
+                onChange={(endPeriod) => updateExperience(profile, onChange, index, { endPeriod })}
               />
-            </Field>
-            <Field className="full" label={m.experience.whatYouDid}>
+              <label className="period-current">
+                <input
+                  type="checkbox"
+                  checked={experience.endPeriod === PRESENT_PERIOD}
+                  onChange={(event) =>
+                    updateExperience(profile, onChange, index, {
+                      endPeriod: event.target.checked ? PRESENT_PERIOD : "",
+                    })
+                  }
+                />
+                {m.experience.current}
+              </label>
+            </div>
+            <Field className="full" label={m.experience.description} hint={m.experience.descriptionHint}>
               <textarea
-                value={experience.description}
+                className="role-description"
+                value={roleDescription(experience)}
                 onChange={(event) =>
-                  updateExperience(profile, onChange, index, { description: event.target.value })
+                  updateExperience(profile, onChange, index, {
+                    description: event.target.value,
+                    achievements: "",
+                  })
                 }
               />
             </Field>
-            <Field className="full" label={m.experience.achievements}>
-              <textarea
-                value={experience.achievements}
-                onChange={(event) =>
-                  updateExperience(profile, onChange, index, { achievements: event.target.value })
-                }
-              />
-            </Field>
-            <Field className="full" label={m.experience.roleTech}>
+            <Field className="full" label={m.experience.roleTech} hint={m.experience.roleTechHint}>
               <TagInput
                 values={experience.technologies}
                 suggestions={TECHNOLOGY_SUGGESTIONS}
+                featured={stackSuggestions(profile.technologies)}
                 placeholder={m.identity.searchPlaceholder}
                 onChange={(technologies) =>
                   updateExperience(profile, onChange, index, { technologies })
@@ -448,24 +470,6 @@ function ExperienceForm({
           </button>
         </article>
       ))}
-      <Field label={m.experience.architecture}>
-        <textarea
-          value={profile.architectureExperience}
-          onChange={(event) => onChange({ ...profile, architectureExperience: event.target.value })}
-        />
-      </Field>
-      <Field label={m.experience.leadership}>
-        <textarea
-          value={profile.leadershipExperience}
-          onChange={(event) => onChange({ ...profile, leadershipExperience: event.target.value })}
-        />
-      </Field>
-      <Field label={m.experience.businessImpact}>
-        <textarea
-          value={profile.businessImpact}
-          onChange={(event) => onChange({ ...profile, businessImpact: event.target.value })}
-        />
-      </Field>
       <button
         className="btn ghost"
         type="button"
@@ -502,19 +506,24 @@ function PositioningForm({
   profile: ProfileInput;
   onChange: (profile: ProfileInput) => void;
 }) {
-  const { m } = useI18n();
+  const { m, locale } = useI18n();
+  const audience = parseAudienceValue(profile.targetAudience);
+  const interests = suggestedInterests(profile.positioning, audience.known, profile.subjectsOfInterest);
+  const visibleInterestIds = new Set(interests.map((item) => item.en));
+  const customInterests = profile.subjectsOfInterest.filter(
+    (value) => !visibleInterestIds.has(interestIdentity(value)),
+  );
+  const hasAudienceOrPosition = profile.positioning.length > 0 || audience.known.length > 0;
   return (
     <div>
-      <Field label={m.positioning.perception}>
-        <textarea
-          value={profile.desiredPerception}
-          onChange={(event) => onChange({ ...profile, desiredPerception: event.target.value })}
-        />
-      </Field>
-      <Field label={m.positioning.positioning}>
+      <div className="field">
+        <span>{m.positioning.perception}</span>
         <div className="pills">
           {POSITIONING_OPTIONS.map((option) => {
             const selected = profile.positioning.includes(option);
+            const positioning = selected
+              ? profile.positioning.filter((item) => item !== option)
+              : [...profile.positioning, option];
             return (
               <button
                 key={option}
@@ -523,9 +532,8 @@ function PositioningForm({
                 onClick={() =>
                   onChange({
                     ...profile,
-                    positioning: selected
-                      ? profile.positioning.filter((item) => item !== option)
-                      : [...profile.positioning, option],
+                    positioning,
+                    desiredPerception: positioning.join(", "),
                   })
                 }
               >
@@ -534,19 +542,94 @@ function PositioningForm({
             );
           })}
         </div>
-      </Field>
-      <Field label={m.positioning.audience}>
-        <textarea
-          value={profile.targetAudience}
-          onChange={(event) => onChange({ ...profile, targetAudience: event.target.value })}
-        />
-      </Field>
-      <Field label={m.positioning.interest}>
-        <TagInput
-          values={profile.subjectsOfInterest}
-          onChange={(subjectsOfInterest) => onChange({ ...profile, subjectsOfInterest })}
-        />
-      </Field>
+      </div>
+      <div className="field">
+        <span>{m.positioning.audience}</span>
+        <div className="pills">
+          {AUDIENCES.map((option) => {
+            const selected = audience.known.includes(option.en);
+            const known = selected
+              ? audience.known.filter((item) => item !== option.en)
+              : [...audience.known, option.en];
+            return (
+              <button
+                key={option.en}
+                type="button"
+                className={selected ? "pill selected" : "pill"}
+                onClick={() =>
+                  onChange({
+                    ...profile,
+                    targetAudience: audienceValue(known, audience.custom),
+                  })
+                }
+              >
+                {audienceLabel(option.en, locale)}
+              </button>
+            );
+          })}
+          {audience.custom.map((value) => (
+            <button
+              key={value}
+              type="button"
+              className="pill selected"
+              onClick={() =>
+                onChange({
+                  ...profile,
+                  targetAudience: audienceValue(
+                    audience.known,
+                    audience.custom.filter((item) => item !== value),
+                  ),
+                })
+              }
+            >
+              {value}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="field">
+        <span>{m.positioning.interest}</span>
+        <span className="field-hint">
+          {hasAudienceOrPosition ? m.positioning.interestHint : m.positioning.interestEmpty}
+        </span>
+        <div className="pills">
+          {interests.map((option) => {
+            const selected = selectedIncludes(profile.subjectsOfInterest, option);
+            return (
+              <button
+                key={option.en}
+                type="button"
+                className={selected ? "pill selected" : "pill"}
+                onClick={() =>
+                  onChange({
+                    ...profile,
+                    subjectsOfInterest: selected
+                      ? profile.subjectsOfInterest.filter((value) => interestIdentity(value) !== option.en)
+                      : [...profile.subjectsOfInterest, option.en].slice(0, 30),
+                  })
+                }
+              >
+                {interestLabel(option.en, locale)}
+              </button>
+            );
+          })}
+          {customInterests.map((value) => (
+            <button
+              key={value}
+              type="button"
+              className="pill selected"
+              onClick={() =>
+                onChange({
+                  ...profile,
+                  subjectsOfInterest: profile.subjectsOfInterest.filter((item) => item !== value),
+                })
+              }
+            >
+              {interestLabel(value, locale)}
+            </button>
+          ))}
+        </div>
+      </div>
       <Field label={m.positioning.avoid}>
         <TagInput
           values={profile.subjectsToAvoid}
@@ -684,16 +767,154 @@ function Field({
   );
 }
 
+function dedupeTerms(terms: readonly LocalizedTerm[]) {
+  const seen = new Set<string>();
+  return terms.filter((term) => {
+    const key = term.en.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function stackSuggestions(values: string[]): LocalizedTerm[] {
+  const seen = new Set<string>();
+  const terms: LocalizedTerm[] = [];
+  for (const value of values) {
+    const known = matchTerm(value, TECHNOLOGY_SUGGESTIONS) ?? sameTerm(value);
+    const key = known.en.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    terms.push(known);
+  }
+  return terms;
+}
+
+const PRESENT_PERIOD = "present";
+
+function currentMonth() {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthValue(value: string) {
+  return /^\d{4}-\d{2}$/.test(value) ? value : "";
+}
+
+function parsePeriod(value: string) {
+  const match = /^(\d{4})-(\d{2})$/.exec(value);
+  if (!match) return { year: "", month: "" };
+  return { year: match[1] ?? "", month: match[2] ?? "" };
+}
+
+function periodAllowed(year: string, month: string, min: string | undefined, max: string | undefined) {
+  if (!year || !month) return true;
+  const stamp = `${year}-${month}`;
+  if (min && stamp < min) return false;
+  if (max && stamp > max) return false;
+  return true;
+}
+
+function MonthYearSelect({
+  value,
+  onChange,
+  disabled,
+  min,
+  max,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  min?: string;
+  max?: string;
+}) {
+  const { dateLocale, m } = useI18n();
+  const parsed = parsePeriod(value);
+  const [month, setMonth] = useState(parsed.month);
+  const [year, setYear] = useState(parsed.year);
+
+  useEffect(() => {
+    setMonth(parsed.month);
+    setYear(parsed.year);
+  }, [parsed.month, parsed.year]);
+
+  const today = new Date();
+  const maxYear = max ? Number(max.slice(0, 4)) : today.getFullYear();
+  const minYear = min ? Number(min.slice(0, 4)) : today.getFullYear() - 60;
+  const years =
+    maxYear >= minYear
+      ? Array.from({ length: maxYear - minYear + 1 }, (_, index) => String(maxYear - index))
+      : [];
+  const months = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, "0")).filter((item) =>
+    periodAllowed(year, item, min, max),
+  );
+
+  function commit(nextMonth: string, nextYear: string) {
+    const monthOk = !nextMonth || periodAllowed(nextYear, nextMonth, min, max);
+    const resolvedMonth = monthOk ? nextMonth : "";
+    setMonth(resolvedMonth);
+    setYear(nextYear);
+    if (resolvedMonth && nextYear) onChange(`${nextYear}-${resolvedMonth}`);
+    else if (!resolvedMonth && !nextYear) onChange("");
+  }
+
+  return (
+    <div className="period-row">
+      <select
+        aria-label={m.experience.month}
+        disabled={disabled}
+        value={month}
+        onChange={(event) => commit(event.target.value, year)}
+      >
+        <option value="">{m.experience.month}</option>
+        {months.map((item) => {
+          const name = new Intl.DateTimeFormat(dateLocale, { month: "long" }).format(
+            new Date(2020, Number(item) - 1, 1),
+          );
+          return (
+            <option key={item} value={item}>
+              {name.charAt(0).toLocaleUpperCase(dateLocale) + name.slice(1)}
+            </option>
+          );
+        })}
+      </select>
+      <select
+        aria-label={m.experience.year}
+        disabled={disabled}
+        value={year}
+        onChange={(event) => commit(month, event.target.value)}
+      >
+        <option value="">{m.experience.year}</option>
+        {years.map((item) => (
+          <option key={item} value={item}>
+            {item}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function roleDescription(experience: ProfileInput["experiences"][number]) {
+  const description = experience.description.trim();
+  const achievements = experience.achievements.trim();
+  if (!achievements || description.includes(achievements)) return experience.description;
+  if (!description) return experience.achievements;
+  return `${experience.description}\n\n${experience.achievements}`;
+}
+
 function TagInput({
   values,
   onChange,
   suggestions,
+  featured,
   allowCustom = true,
   placeholder,
 }: {
   values: string[];
   onChange: (values: string[]) => void;
   suggestions?: readonly LocalizedTerm[];
+  featured?: readonly LocalizedTerm[];
   allowCustom?: boolean;
   placeholder?: string;
 }) {
@@ -713,14 +934,17 @@ function TagInput({
     return matchTerm(value, suggestions)?.[locale] ?? value;
   }
 
+  const catalog = suggestions
+    ? dedupeTerms([...(featured ?? []), ...suggestions])
+    : [];
   const matches =
-    suggestions && query.length > 0
-      ? suggestions
+    query.length > 0
+      ? catalog
           .filter((item) => !isTaken(item))
           .filter((item) => `${item.en} ${item.pt} ${item.es}`.toLowerCase().includes(query))
           .slice(0, 8)
-      : [];
-  const showList = open && query.length > 0 && suggestions !== undefined;
+      : (featured ?? []).filter((item) => !isTaken(item)).slice(0, 8);
+  const showList = open && suggestions !== undefined && (query.length > 0 || matches.length > 0);
 
   function addValue(next: string) {
     const value = next.trim();
@@ -769,6 +993,7 @@ function TagInput({
               setActive(0);
             }}
             onFocus={() => setOpen(true)}
+            onClick={() => setOpen(true)}
             onBlur={() => setOpen(false)}
             onKeyDown={(event) => {
               if (event.key === "ArrowDown" && matches.length > 0) {

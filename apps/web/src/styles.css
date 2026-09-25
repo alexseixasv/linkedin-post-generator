@@ -362,6 +362,33 @@ select {
   font-weight: 400;
 }
 
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border-radius: 4px;
+  accent-color: var(--near-black);
+}
+
+select:disabled {
+  color: var(--muted);
+  background: var(--stone);
+}
+
+.period-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
+  gap: 8px;
+}
+
+.period-current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+}
+
 input:focus,
 textarea:focus,
 select:focus {
@@ -372,6 +399,10 @@ select:focus {
 textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+textarea.role-description {
+  min-height: 180px;
 }
 
 .pills {
@@ -602,13 +633,138 @@ textarea {
 }
 
 .persona-result h3 {
-  margin: 16px 0 8px;
+  margin: 8px 0;
   font-size: 24px;
 }
 
 .persona-result p {
   color: var(--slate);
   line-height: 1.5;
+}
+
+.persona-result .eyebrow {
+  color: var(--muted);
+}
+
+.disclosures {
+  border-top: 1px solid var(--hairline);
+  margin: 20px 0 8px;
+}
+
+.disclosure {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.disclosure summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 2px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.disclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosure summary::marker {
+  content: "";
+}
+
+.disclosure summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.disclosure-count {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.disclosure .chevron {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--near-black);
+  transition: transform 0.15s ease;
+}
+
+.disclosure[open] .chevron {
+  transform: rotate(180deg);
+}
+
+.disclosure-body {
+  padding: 0 2px 16px;
+}
+
+.disclosure-body p {
+  margin: 0;
+}
+
+.disclosure-body .promise-list {
+  margin-top: 0;
+}
+
+.disclosure-group {
+  margin: 28px 0 0;
+}
+
+.pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--slate);
+}
+
+.disclosure.strong .pip {
+  background: var(--deep-green);
+}
+
+.disclosure.credible .pip {
+  background: var(--near-black);
+}
+
+.disclosure.adjacent .pip {
+  background: var(--action-blue);
+}
+
+.disclosure.risky .pip {
+  background: var(--error);
+}
+
+.disclosure.strong[open] .disclosure-body {
+  background: var(--green-wash);
+}
+
+.disclosure.credible[open] .disclosure-body {
+  background: var(--stone);
+}
+
+.disclosure.adjacent[open] .disclosure-body {
+  background: var(--blue-wash);
+}
+
+.disclosure.risky[open] .disclosure-body {
+  background: var(--error-wash);
+}
+
+.disclosure[open].strong .disclosure-body,
+.disclosure[open].credible .disclosure-body,
+.disclosure[open].adjacent .disclosure-body,
+.disclosure[open].risky .disclosure-body {
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
 }
 
 .article-list {

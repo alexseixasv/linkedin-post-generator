@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { PersonaPublic } from "@studio/shared";
 import { fetchPersona, generatePersona, type ApiError } from "./api";
 import { useI18n } from "./i18n";
@@ -78,92 +78,136 @@ function PersonaResult({ persona }: { persona: PersonaPublic }) {
   return (
     <div className="persona-result">
       <h3>{body.positioningStatement}</h3>
-      <p className="lede">{body.careerNarrative}</p>
       <p className="eyebrow">
         {body.seniority} · {persona.model} · {persona.promptVersion}
       </p>
 
-      <div className="grid-2">
-        <Fact label={m.persona.coreExpertise} values={body.coreExpertise} />
-        <Fact label={m.persona.supportingExpertise} values={body.supportingExpertise} />
-        <Fact label={m.persona.contentPillars} values={body.contentPillars} />
-        <Fact label={m.persona.differentiators} values={body.differentiators} />
+      <div className="disclosures">
+        <Disclosure title={m.persona.narrative}>
+          <p>{body.careerNarrative}</p>
+        </Disclosure>
+        <Disclosure title={m.persona.coreExpertise} count={body.coreExpertise.length}>
+          <TagList values={body.coreExpertise} empty={m.persona.noneEvidence} />
+        </Disclosure>
+        <Disclosure title={m.persona.supportingExpertise} count={body.supportingExpertise.length}>
+          <TagList values={body.supportingExpertise} empty={m.persona.noneEvidence} />
+        </Disclosure>
+        <Disclosure title={m.persona.contentPillars} count={body.contentPillars.length}>
+          <TagList values={body.contentPillars} empty={m.persona.noneEvidence} />
+        </Disclosure>
+        <Disclosure title={m.persona.differentiators} count={body.differentiators.length}>
+          <TagList values={body.differentiators} empty={m.persona.noneEvidence} />
+        </Disclosure>
+        <Disclosure title={m.persona.technicalDepth}>
+          <p>{body.technicalDepth}</p>
+        </Disclosure>
+        <Disclosure title={m.persona.leadership}>
+          <p>{body.leadershipExposure}</p>
+        </Disclosure>
+        <Disclosure title={m.persona.audience}>
+          <p>{body.targetAudience}</p>
+        </Disclosure>
+        <Disclosure title={m.persona.perception}>
+          <p>{body.desiredPerception}</p>
+        </Disclosure>
+        <Disclosure title={m.persona.proofPoints} count={body.proofPoints.length}>
+          <TopicList
+            items={body.proofPoints.map((point) => ({ topic: point.claim, evidence: point.evidence }))}
+            empty={m.common.none}
+          />
+        </Disclosure>
       </div>
 
-      <p>
-        <strong>{m.persona.technicalDepth}.</strong> {body.technicalDepth}
-      </p>
-      <p>
-        <strong>{m.persona.leadership}.</strong> {body.leadershipExposure}
-      </p>
-      <p>
-        <strong>{m.persona.audience}.</strong> {body.targetAudience}
-      </p>
-      <p>
-        <strong>{m.persona.perception}.</strong> {body.desiredPerception}
-      </p>
-
-      {body.proofPoints.length > 0 ? (
-        <div>
-          <h3>{m.persona.proofPoints}</h3>
-          <ul className="promise-list">
-            {body.proofPoints.map((point) => (
-              <li key={point.claim}>
-                <strong>{point.claim}</strong> — {point.evidence}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      <div className="bands">
-        <Band title={m.persona.strong} tone="strong" items={body.strongAuthorityTopics} />
-        <Band title={m.persona.credible} tone="credible" items={body.credibleTopics} />
-        <Band title={m.persona.adjacent} tone="adjacent" items={body.adjacentTopics} />
-        <Band title={m.persona.risky} tone="risky" items={body.riskyTopics} />
-      </div>
-    </div>
-  );
-}
-
-function Fact({ label, values }: { label: string; values: string[] }) {
-  const { m } = useI18n();
-  return (
-    <div className="field">
-      <strong>{label}</strong>
-      <div className="tags">
-        {values.length === 0 ? <span className="empty">{m.persona.noneEvidence}</span> : null}
-        {values.map((value) => (
-          <span className="tag" key={value}>
-            {value}
-          </span>
-        ))}
+      <p className="eyebrow disclosure-group">{m.persona.authorityMap}</p>
+      <div className="disclosures">
+        <Disclosure title={m.persona.strong} count={body.strongAuthorityTopics.length} tone="strong">
+          <TopicList items={body.strongAuthorityTopics} empty={m.common.none} />
+        </Disclosure>
+        <Disclosure title={m.persona.credible} count={body.credibleTopics.length} tone="credible">
+          <TopicList items={body.credibleTopics} empty={m.common.none} />
+        </Disclosure>
+        <Disclosure title={m.persona.adjacent} count={body.adjacentTopics.length} tone="adjacent">
+          <TopicList items={body.adjacentTopics} empty={m.common.none} />
+        </Disclosure>
+        <Disclosure title={m.persona.risky} count={body.riskyTopics.length} tone="risky">
+          <TopicList items={body.riskyTopics} empty={m.common.none} />
+        </Disclosure>
       </div>
     </div>
   );
 }
 
-function Band({
+function Disclosure({
   title,
+  count,
   tone,
-  items,
+  children,
 }: {
   title: string;
-  tone: "strong" | "credible" | "adjacent" | "risky";
-  items: Array<{ topic: string; evidence: string }>;
+  count?: number;
+  tone?: "strong" | "credible" | "adjacent" | "risky";
+  children: ReactNode;
 }) {
-  const { m } = useI18n();
   return (
-    <section className={`band ${tone}`}>
-      <strong>{title}</strong>
-      {items.length === 0 ? <p className="empty">{m.common.none}</p> : null}
-      {items.map((item) => (
-        <p key={item.topic}>
-          <span className="tag">{item.topic}</span>
-          <br />
-          <span className="eyebrow">{item.evidence}</span>
-        </p>
+    <details className={tone ? `disclosure ${tone}` : "disclosure"}>
+      <summary>
+        {tone ? <span className="pip" aria-hidden="true" /> : null}
+        <span>{title}</span>
+        {count !== undefined ? <span className="disclosure-count">{count}</span> : null}
+        <Chevron />
+      </summary>
+      <div className="disclosure-body">{children}</div>
+    </details>
+  );
+}
+
+function Chevron() {
+  return (
+    <svg className="chevron" viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        d="M4 6.5 8 10.5 12 6.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TagList({ values, empty }: { values: string[]; empty: string }) {
+  if (values.length === 0) {
+    return <p className="empty">{empty}</p>;
+  }
+  return (
+    <div className="tags">
+      {values.map((value) => (
+        <span className="tag" key={value}>
+          {value}
+        </span>
       ))}
-    </section>
+    </div>
+  );
+}
+
+function TopicList({
+  items,
+  empty,
+}: {
+  items: Array<{ topic: string; evidence: string }>;
+  empty: string;
+}) {
+  if (items.length === 0) {
+    return <p className="empty">{empty}</p>;
+  }
+  return (
+    <ul className="promise-list">
+      {items.map((item) => (
+        <li key={item.topic}>
+          <strong>{item.topic}</strong> — {item.evidence}
+        </li>
+      ))}
+    </ul>
   );
 }

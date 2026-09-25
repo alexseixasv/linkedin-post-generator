@@ -25,6 +25,7 @@ export const POSITIONING_OPTIONS = [
   "Cloud Specialist",
   "Platform Specialist",
   "Career Specialist",
+  "Technology Influencer",
 ] as const;
 
 export type WritingTone = (typeof WRITING_TONES)[number];
